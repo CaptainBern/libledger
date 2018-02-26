@@ -1,0 +1,25 @@
+#ifndef LIBLEDGER_VERSION_H_
+#define LIBLEDGER_VERSION_H_
+
+#define LIBLEDGER_VERSION "@LIBLEDGER_VERSION@"
+#define LIBLEDGER_VERSION_MAJOR @LIBLEDGER_VERSION_MAJOR@
+#define LIBLEDGER_VERSION_MINOR @LIBLEDGER_VERSION_MINOR@
+#define LIBLEDGER_VERSION_PATCH @LIBLEDGER_VERSION_PATCH@
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern const char *libledger_version(void);
+
+extern int libledger_version_major(void);
+
+extern int libledger_version_minor(void);
+
+extern int libledger_version_patch(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* LIBLEDGER_VERSION_H_ */
