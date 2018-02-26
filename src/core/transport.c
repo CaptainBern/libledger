@@ -256,8 +256,8 @@ int ledger_transport_read_apdu(struct ledger_device *device, uint16_t comm_chann
 
     _reply->apdu = apdu;
     _reply->apdu_len = apdu_len;
-
     *reply = _reply;
+    
     return LEDGER_SUCCESS;
 
 error:
