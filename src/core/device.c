@@ -40,7 +40,7 @@ void ledger_close_device(struct ledger_device *device) {
 int ledger_write(struct ledger_device *device, const uint8_t *data, size_t data_len, size_t *written) {
     int n;
     int ret;
-    
+
     pthread_mutex_lock(&device->lock);
     n = hid_write(device->usb, data, data_len);
     pthread_mutex_unlock(&device->lock);
@@ -62,7 +62,7 @@ int ledger_write(struct ledger_device *device, const uint8_t *data, size_t data_
 int ledger_read(struct ledger_device *device, uint8_t *data, size_t data_len, size_t *read, int timeout) {
     int n;
     int ret;
-    
+
     pthread_mutex_lock(&device->lock);
     n = hid_read_timeout(device->usb, data, data_len, timeout);
     pthread_mutex_unlock(&device->lock);

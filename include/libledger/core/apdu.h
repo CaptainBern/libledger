@@ -25,11 +25,11 @@ extern "C" {
  * Case 2: CLA | INS | P1 | P2 | Le
  * Case 3: CLA | INS | P1 | P2 | Lc | Data
  * Case 4: CLA | INS | P1 | P2 | Lc | Data | Le
- * 
- * Unlike fully ISO 7816 compliant devices, Ledger devices 
+ *
+ * Unlike fully ISO 7816 compliant devices, Ledger devices
  * only support short APDUs and thus the data payload can
- * only be 255 bytes at most. 
- */ 
+ * only be 255 bytes at most.
+ */
 enum ledger_apdu_case {
     LEDGER_APDU_CASE_1,
     LEDGER_APDU_CASE_2,

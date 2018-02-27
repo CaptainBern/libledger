@@ -21,7 +21,7 @@ size_t binary_hton_uint16(void *out, uint16_t value) {
     uint8_t buffer[2];
     buffer[0] = (value >> 8) & 0xff;
     buffer[1] = value & 0xff;
-    
+
     return binary_hton(
         out,
         &buffer,
@@ -29,7 +29,7 @@ size_t binary_hton_uint16(void *out, uint16_t value) {
     );
 }
 
-size_t binary_hton_uint32(void *out, uint32_t value) {    
+size_t binary_hton_uint32(void *out, uint32_t value) {
     uint8_t buffer[4];
     buffer[0] = (value >> 24) & 0xff;
     buffer[1] = (value >> 16) & 0xff;
@@ -39,7 +39,7 @@ size_t binary_hton_uint32(void *out, uint32_t value) {
     return binary_hton(
         out,
         &buffer,
-        sizeof buffer 
+        sizeof buffer
     );
 }
 
@@ -54,7 +54,7 @@ size_t binary_hton_uint64(void *out, uint64_t value) {
     buffer[6] = (value >> 8) & 0xff;
     buffer[7] = value & 0xff;
 
-    return binary_hton( 
+    return binary_hton(
         out,
         &buffer,
         sizeof buffer

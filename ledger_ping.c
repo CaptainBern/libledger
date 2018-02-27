@@ -8,7 +8,7 @@
 
 /**
  * Browser Support needs to be turned off inside the Ethereum App for this to work!
- * 
+ *
  * Contract Data can be either turned off or on; it appears to glitch out sometimes tho
  */
 void ethereum_app_get_version(struct ledger_device *device) {
@@ -34,7 +34,7 @@ void ethereum_app_get_version(struct ledger_device *device) {
     }
 
     printf("APDU length: %d\n", reply->apdu_len);
-    
+
     size_t offset = 0;
 
     uint8_t flags;

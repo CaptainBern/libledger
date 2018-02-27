@@ -1,5 +1,3 @@
-#include <stddef.h>
-
 #include "libledger/core/error.h"
 
 static const char *ledger_error_table[LEDGER_ERROR_COUNT] = {

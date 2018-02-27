@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
      */
     if (hid_devices != NULL) {
         printf("Found a Ledger Nano S device\n");
-        
+
         int err = ledger_open_device(curr_hid_device->path, &ledger_device);
         if (err != LEDGER_SUCCESS) {
             printf("Failed to open device: %s\n", ledger_error_string(err));

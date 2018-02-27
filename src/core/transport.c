@@ -73,14 +73,14 @@ int ledger_transport_read(struct ledger_device *device, struct ledger_transport_
             // ping does not have any data
             break;
         }
-        case LEDGER_TRANSPORT_CMD_APDU: {            
+        case LEDGER_TRANSPORT_CMD_APDU: {
             offset += binary_ntoh_uint16(&buffer[offset], &reply.apdu_part.sequence_id);
             offset += binary_ntoh(&buffer[offset], &reply.apdu_part.data, sizeof reply.apdu_part.data);
             break;
         }
         default: {
             return LEDGER_ERROR_TRANSPORT_UNKNOWN_COMMAND;
-        } 
+        }
     }
 
     if (out) {
@@ -138,7 +138,7 @@ int ledger_transport_allocate_channel(struct ledger_device *device, struct ledge
     if (reply.command_tag != LEDGER_TRANSPORT_CMD_ALLOCATE_CHANNEL) {
         return LEDGER_ERROR_TRANSPORT_UNEXPECTED_REPLY;
     }
-    
+
     channel->channel_id = reply.channel.channel_id;
     return LEDGER_SUCCESS;
 }
@@ -168,7 +168,7 @@ int ledger_transport_ping(struct ledger_device *device) {
     return LEDGER_SUCCESS;
 }
 
-int ledger_transport_write_apdu(struct ledger_device *device, uint16_t comm_channel_id, const uint8_t *apdu, size_t apdu_len) {    
+int ledger_transport_write_apdu(struct ledger_device *device, uint16_t comm_channel_id, const uint8_t *apdu, size_t apdu_len) {
     struct ledger_transport_command command = {
         .comm_channel_id = comm_channel_id,
         .command_tag = LEDGER_TRANSPORT_CMD_APDU,
@@ -178,7 +178,7 @@ int ledger_transport_write_apdu(struct ledger_device *device, uint16_t comm_chan
     for (int i = 0; offset < apdu_len; i++) {
         struct ledger_transport_apdu_part apdu_part;
         memset(&apdu_part.data, 0, sizeof apdu_part.data);
-        
+
         size_t written = 0;
         if (i == 0) {
             written = binary_hton_uint16(&apdu_part.data, apdu_len);
@@ -213,7 +213,7 @@ int ledger_transport_read_apdu(struct ledger_device *device, uint16_t comm_chann
 
     do {
         struct ledger_transport_reply reply;
-        
+
         ret = ledger_transport_read(device, &reply, LEDGER_TRANSPORT_DEFAULT_TIMEOUT);
         if (ret != LEDGER_SUCCESS) {
             goto error;
@@ -257,7 +257,7 @@ int ledger_transport_read_apdu(struct ledger_device *device, uint16_t comm_chann
     _reply->apdu = apdu;
     _reply->apdu_len = apdu_len;
     *reply = _reply;
-    
+
     return LEDGER_SUCCESS;
 
 error:

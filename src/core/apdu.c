@@ -17,7 +17,7 @@ static const struct apdu_status apdu_status_table[] = {
     { 0x62, 0x82, "The end of the file has been reached before the end of reading" },
     { 0x62, 0x83, "Invalid DF "},
     { 0x62, 0x84, "Selected file is not valid. File descriptor error" },
-    
+
     { 0x63, 0x00, "Authentication failed. Invalid secret code or forbidden value" },
     { 0x63, 0x81, "File filled up by the last write" },
 
@@ -90,7 +90,7 @@ size_t ledger_apdu(void *out, size_t out_len, uint8_t cla, uint8_t ins, uint8_t 
     written += binary_hton_uint8(out + written, ins);
     written += binary_hton_uint8(out + written, p1);
     written += binary_hton_uint8(out + written, p2);
-    
+
     return written;
 }
 
@@ -138,6 +138,6 @@ size_t ledger_apdu_data_le(void *out, size_t out_len, uint8_t cla, uint8_t ins, 
     written += binary_hton_uint8(out + written, data_len);
     written += binary_hton(out + written, data, data_len);
     written += binary_hton_uint8(out + written, le);
-    
+
     return written;
 }
