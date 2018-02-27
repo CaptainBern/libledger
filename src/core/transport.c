@@ -26,7 +26,7 @@ int ledger_transport_write(struct ledger_device *device, struct ledger_transport
             break;
         }
         default: {
-            return LEDGER_ERROR_TRANSPORT_UNKNOWN_COMMAND;
+            return LEDGER_ERROR_TRANSPORT_COMMAND;
         }
     }
 
@@ -79,7 +79,7 @@ int ledger_transport_read(struct ledger_device *device, struct ledger_transport_
             break;
         }
         default: {
-            return LEDGER_ERROR_TRANSPORT_UNKNOWN_COMMAND;
+            return LEDGER_ERROR_TRANSPORT_COMMAND;
         }
     }
 
@@ -109,7 +109,7 @@ int ledger_transport_get_version(struct ledger_device *device, struct ledger_tra
     }
 
     if (reply.command_tag != LEDGER_TRANSPORT_CMD_GET_VERSION) {
-        return LEDGER_ERROR_TRANSPORT_UNEXPECTED_REPLY;
+        return LEDGER_ERROR_TRANSPORT_REPLY;
     }
 
     version->version = reply.version.version;
@@ -136,7 +136,7 @@ int ledger_transport_allocate_channel(struct ledger_device *device, struct ledge
     }
 
     if (reply.command_tag != LEDGER_TRANSPORT_CMD_ALLOCATE_CHANNEL) {
-        return LEDGER_ERROR_TRANSPORT_UNEXPECTED_REPLY;
+        return LEDGER_ERROR_TRANSPORT_REPLY;
     }
 
     channel->channel_id = reply.channel.channel_id;
@@ -163,7 +163,7 @@ int ledger_transport_ping(struct ledger_device *device) {
     }
 
     if (reply.command_tag != LEDGER_TRANSPORT_CMD_PING) {
-        return LEDGER_ERROR_TRANSPORT_UNEXPECTED_REPLY;
+        return LEDGER_ERROR_TRANSPORT_REPLY;
     }
     return LEDGER_SUCCESS;
 }
@@ -205,8 +205,8 @@ int ledger_transport_write_apdu(struct ledger_device *device, uint16_t comm_chan
 int ledger_transport_read_apdu(struct ledger_device *device, uint16_t comm_channel_id, struct ledger_transport_apdu_reply **reply) {
     int ret = 0;
 
-    uint8_t *apdu;
-    uint16_t apdu_len = 0;
+	uint16_t response_data_len = 0;
+	uint8_t *response_data;
 
     size_t offset = 0;
     uint16_t sequence_id = 0;
@@ -219,34 +219,43 @@ int ledger_transport_read_apdu(struct ledger_device *device, uint16_t comm_chann
             goto error;
         }
 
-        if (reply.comm_channel_id != comm_channel_id || reply.command_tag != LEDGER_TRANSPORT_CMD_APDU) {
-            ret = LEDGER_ERROR_TRANSPORT_UNEXPECTED_REPLY;
-            goto error;
-        }
+		if (reply.comm_channel_id != comm_channel_id) {
+			ret = LEDGER_ERROR_TRANSPORT_CHANNEL;
+			goto error;
+		}
+
+		if (reply.command_tag != LEDGER_TRANSPORT_CMD_APDU) {
+			ret = LEDGER_ERROR_TRANSPORT_COMMAND;
+			goto error;
+		}
 
         if (reply.apdu_part.sequence_id != sequence_id) {
-            ret =  LEDGER_ERROR_TRANSPORT_UNEXPECTED_REPLY;
+            ret =  LEDGER_ERROR_TRANSPORT_REPLY;
             goto error;
         }
 
         size_t read = 0;
         if (reply.apdu_part.sequence_id == 0) {
-            // Typically apdu_len is at least 2. It's up to the user of this library to make sure of that though
-            read += binary_ntoh_uint16(&reply.apdu_part.data[0], &apdu_len);
-            apdu = malloc(apdu_len * sizeof(uint8_t));
-            if (!apdu) {
+            read += binary_ntoh_uint16(&reply.apdu_part.data[0], &response_data_len);
+			if (response_data_len < 2) {
+				return LEDGER_ERROR_INCORRECT_LENGTH;
+			}
+
+            response_data = malloc(response_data_len * sizeof(uint8_t));
+            if (!response_data) {
                 return LEDGER_ERROR_NOMEM;
             }
         }
 
-        size_t remaining = apdu_len - offset;
+        size_t remaining = response_data_len - offset;
         if (remaining > (sizeof(reply.apdu_part.data) - read)) {
             remaining = sizeof(reply.apdu_part.data) - read;
         }
 
-        offset += binary_ntoh(&reply.apdu_part.data[read], &apdu[offset], remaining);
-        sequence_id++;
-    } while (offset < apdu_len);
+        offset += binary_ntoh(&reply.apdu_part.data[read], &response_data[offset], remaining);
+
+		sequence_id++;
+    } while (offset < response_data_len);
 
     struct ledger_transport_apdu_reply *_reply = malloc(sizeof(struct ledger_transport_apdu_reply));
     if (!_reply) {
@@ -254,22 +263,23 @@ int ledger_transport_read_apdu(struct ledger_device *device, uint16_t comm_chann
         goto error;
     }
 
-    _reply->apdu = apdu;
-    _reply->apdu_len = apdu_len;
+	_reply->data = response_data;
+	_reply->data_len = response_data_len;
+
     *reply = _reply;
 
     return LEDGER_SUCCESS;
 
 error:
-    if (apdu) {
-        free(apdu);
+    if (response_data) {
+        free(response_data);
     }
     return ret;
 }
 
 void ledger_transport_free_apdu_reply(struct ledger_transport_apdu_reply *reply) {
     if (reply) {
-        free(reply->apdu);
+        free(reply->data);
         free(reply);
     }
 }

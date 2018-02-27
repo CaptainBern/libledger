@@ -6,8 +6,10 @@ static const char *ledger_error_table[LEDGER_ERROR_COUNT] = {
     "Out of memory",
     "Invalid parameter",
     "I/O error",
-    "Transport: unknown command",
-    "Transport: unexpected reply",
+	"Incorrect length",
+    "Transport: incorrect channel",
+    "Transport: incorrect command",
+	"Transport: incorrect reply",
     "Unknown error"
 };
 
