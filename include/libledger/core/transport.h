@@ -53,8 +53,8 @@ struct ledger_transport_reply {
 };
 
 struct ledger_transport_apdu_reply {
-    uint8_t *apdu;
-    uint16_t apdu_len;
+    uint8_t *data;
+    uint16_t data_len;
 };
 
 extern int ledger_transport_write(struct ledger_device *device, struct ledger_transport_command *command);
