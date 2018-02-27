@@ -62,6 +62,4 @@ pkgconfig.generate(
     description: 'Ledger Nano S/Ledger Blue library'
 )
 
-# example test shit fo laterz
-ledger_ping = executable('ledger_ping', 'ledger_ping.c', dependencies: libledger)
-test('ledger ping', ledger_ping)
+subdir('examples')
