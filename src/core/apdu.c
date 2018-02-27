@@ -1,17 +1,13 @@
-#include "libledger/internal/binary.h"
 #include "libledger/core/apdu.h"
 
-// TODO: find a use for the APDU sw shit
-
-/*
-struct apdu_status {
+struct apdu_status_description {
     const unsigned int sw1;
     const unsigned int sw2;
     const char *description;
 };
 
 // APDU status words, taken from https://web.archive.org/web/20090623030155/http://cheef.ru/docs/HowTo/SW1SW2.info
-static const struct apdu_status apdu_status_table[] = {
+static const struct apdu_status_description apdu_status_table[] = {
     { 0x62, 0x00, "No information given" },
     { 0x62, 0x81, "Returned data may be corrupted" },
     { 0x62, 0x82, "The end of the file has been reached before the end of reading" },
@@ -52,6 +48,7 @@ static const struct apdu_status apdu_status_table[] = {
     { 0x6A, 0x88, "Referenced data not found" },
 
     { 0x6B, 0x00, "Invalid P1 or P2 parameter" },
+	{ 0x6C, 0xFF, "Incorrect P3 length" }, // Special case: the correct length is stored in sw2
     { 0x6D, 0x00, "Invalid or unsupported instruction" },
     { 0x6E, 0x00, "Incorrect application" },
     { 0x6F, 0x00, "Checking error" },
@@ -59,85 +56,14 @@ static const struct apdu_status apdu_status_table[] = {
     { 0x90, 0x00, "Command executed without error" }
 };
 
-static const char* apdu_sw_description(uint8_t sw1, uint8_t sw2) {
-    const int table_size = sizeof(apdu_status_table) / sizeof(struct apdu_status);
+const char* ledger_apdu_sw_description(uint8_t sw1, uint8_t sw2) {
+    const int table_size = sizeof(apdu_status_table) / sizeof(struct apdu_status_description);
 
-    switch (sw1) {
-        case 0x6C: {
-            return "Incorrect P3 length"; // Special case, correct length is stored in sw2
-        }
-        default: {
-            for (int i = 0; i < table_size; i++) {
-                if (apdu_status_table[i].sw1 == sw1 && apdu_status_table[i].sw2 == sw2) {
-                    return apdu_status_table[i].description;
-                }
-            }
-        }
-    }
+    for (int i = 0; i < table_size; i++) {
+		if ((sw1 & apdu_status_table[i].sw1) == sw1 && (sw2 & apdu_status_table[i].sw2) == sw2) {
+			return apdu_status_table[i].description;
+		}
+	}
 
     return "Unknown sw1-sw2";
-}
-
-*/
-
-size_t ledger_apdu(void *out, size_t out_len, uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2) {
-    if (out_len < 4) {
-        return 0;
-    }
-
-    size_t written = 0;
-    written += binary_hton_uint8(out + written, cla);
-    written += binary_hton_uint8(out + written, ins);
-    written += binary_hton_uint8(out + written, p1);
-    written += binary_hton_uint8(out + written, p2);
-
-    return written;
-}
-
-size_t ledger_apdu_le(void *out, size_t out_len, uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8_t le) {
-    if (out_len < (4 + 1)) {
-        return 0;
-    }
-
-    size_t written = 0;
-    written += binary_hton_uint8(out + written, cla);
-    written += binary_hton_uint8(out + written, ins);
-    written += binary_hton_uint8(out + written, p1);
-    written += binary_hton_uint8(out + written, p2);
-    written += binary_hton_uint8(out + written, le);
-
-    return written;
-}
-
-size_t ledger_apdu_data(void *out, size_t out_len, uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8_t *data, size_t data_len) {
-    if (out_len < (4 + 1 + data_len)) {
-        return 0;
-    }
-
-    size_t written = 0;
-    written += binary_hton_uint8(out + written, cla);
-    written += binary_hton_uint8(out + written, ins);
-    written += binary_hton_uint8(out + written, p1);
-    written += binary_hton_uint8(out + written, p2);
-    written += binary_hton_uint8(out + written, data_len);
-    written += binary_hton(out + written, data, data_len);
-
-    return written;
-}
-
-size_t ledger_apdu_data_le(void *out, size_t out_len, uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8_t *data, size_t data_len, uint8_t le) {
-    if (out_len < (4 + 1 + data_len + 1)) {
-        return 0;
-    }
-
-    size_t written = 0;
-    written += binary_hton_uint8(out + written, cla);
-    written += binary_hton_uint8(out + written, ins);
-    written += binary_hton_uint8(out + written, p1);
-    written += binary_hton_uint8(out + written, p2);
-    written += binary_hton_uint8(out + written, data_len);
-    written += binary_hton(out + written, data, data_len);
-    written += binary_hton_uint8(out + written, le);
-
-    return written;
 }
