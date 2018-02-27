@@ -1,10 +1,8 @@
 #ifndef LIBLEDGER_APDU_H_
 #define LIBLEDGER_APDU_H_
 
-#include <stddef.h>
 #include <stdint.h>
-
-#include "libledger/core/device.h"
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,36 +12,18 @@ extern "C" {
 #define LEDGER_APDU_MAX_DATA_LENGTH 0xff
 #define LEDGER_APDU_MAX_LENGTH      (LEDGER_APDU_HEADER_SIZE + LEDGER_APDU_MAX_DATA_LENGTH)
 
-#define LEDGER_APDU_OFFSET_CLA 0x00
-#define LEDGER_APDU_OFFSET_INS 0x01
-#define LEDGER_APDU_OFFSET_P1  0x02
-#define LEDGER_APDU_OFFSET_P2  0x03
+#define LEDGER_APDU_OFFSET_CLA   0x00
+#define LEDGER_APDU_OFFSET_INS   0x01
+#define LEDGER_APDU_OFFSET_P1    0x02
+#define LEDGER_APDU_OFFSET_P2    0x03
+#define LEDGER_APDU_OFFSET_LC    0x04
+#define LEDGER_APDU_OFFSET_CDATA 0x05
 
-/**
- * 4 possible APDU cases:
- * Case 1: CLA | INS | P1 | P2
- * Case 2: CLA | INS | P1 | P2 | Le
- * Case 3: CLA | INS | P1 | P2 | Lc | Data
- * Case 4: CLA | INS | P1 | P2 | Lc | Data | Le
- *
- * Unlike fully ISO 7816 compliant devices, Ledger devices
- * only support short APDUs and thus the data payload can
- * only be 255 bytes at most.
- */
-enum ledger_apdu_case {
-    LEDGER_APDU_CASE_1,
-    LEDGER_APDU_CASE_2,
-    LEDGER_APDU_CASE_3,
-    LEDGER_APDU_CASE_4
-};
+static inline bool ledger_apdu_sw_status_ok(uint8_t sw1, uint8_t sw2) {
+	return (sw1 == 0x90) && (sw2 == 0x00);
+}
 
-extern size_t ledger_apdu(void *out, size_t out_len, uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2);
-
-extern size_t ledger_apdu_le(void *out, size_t out_len, uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8_t le);
-
-extern size_t ledger_apdu_data(void *out, size_t out_len, uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8_t *data, size_t data_len);
-
-extern size_t ledger_apdu_data_le(void *out, size_t out_len, uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8_t *data, size_t data_len, uint8_t le);
+extern const char *ledger_apdu_sw_description(uint8_t sw1, uint8_t sw2);
 
 #ifdef __cplusplus
 }
