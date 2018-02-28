@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "libledger/core/device.h"
+#include "libledger/device.h"
 
 #ifdef __cplusplus
 extern "C" {

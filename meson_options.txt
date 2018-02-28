@@ -1,0 +1,4 @@
+option('bolos_support', description: 'BOLOS support', type: 'boolean', value: true)
+option('u2f_support', description: 'u2f support', type: 'boolean', value: true)
+option('ethereum_support', description: 'ethereum support', type: 'boolean', value: true)
+option('bitcoin_support', description: 'bitcoin support', type: 'boolean', value: true)

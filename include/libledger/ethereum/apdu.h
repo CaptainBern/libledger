@@ -1,0 +1,32 @@
+#ifndef LIBLEDGER_ETHEREUM_APDU_H_
+#define LIBLEDGER_ETHEREUM_APDU_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define LEDGER_ETH_APDU_CLA                       0xE0
+
+#define LEDGER_ETH_APDU_INS_GET_PUBLIC_ADDRESS    0x02
+#define LEDGER_ETH_APDU_INS_SIGN_TRANSACTION      0x04
+#define LEDGER_ETH_APDU_INS_GET_APP_CONFIGURATION 0x06
+#define LEDGER_ETH_APDU_INS_SIGN_PERSONAL_MESSAGE 0x08
+
+#define LEDGER_ETH_APDU_P1_CONFIRM                0x01
+#define LEDGER_ETH_APDU_P1_NO_CONFIRM             0x00
+
+#define LEDGER_ETH_APDU_P2_CHAINCODE              0x01
+#define LEDGER_ETH_APDU_P2_NO_CHAINCODE           0x00
+
+#define LEDGER_ETH_APDU_P1_FIRST                  0x00
+#define LEDGER_ETH_APDU_P1_MORE                   0x80
+
+#define LEDGER_ETH_APDU_FLAGS_DATA_ALLOWED        0x01
+
+#define ETH_APP_CONFIG_DATA(x) (((x)->flags & APDU_ETHEREUM_FLAGS_DATA_ALLOWED) == APDU_ETHEREUM_FLAGS_DATA_ALLOWED)
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* LIBLEDGER_ETHEREUM_APDU_H_ */

@@ -34,6 +34,20 @@ int main(int argc, char *argv[]) {
 
 	printf("Ping success\n");
 
+	struct ledger_bolos_version *version;
+	ret = ledger_bolos_get_version(device, &version);
+	if (ret != LEDGER_SUCCESS) {
+		printf("Failed to retrieve the BOLOS version info: %s\n", ledger_error_string(ret));
+		return EXIT_FAILURE;
+	}
+
+	printf("BOLOS version info:\n");
+	printf("\tTarget ID: 0x%x\n", version->target_id);
+	printf("\tOS version: %s\n", version->os_version);
+	printf("\tMCU version: %s\n", version->mcu_version);
+
+	ledger_bolos_free_version(version);
+
 	ledger_close_device(device);
 
 	return EXIT_SUCCESS;
