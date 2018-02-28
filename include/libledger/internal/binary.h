@@ -1,5 +1,5 @@
-#ifndef LIBLEDGER_BINARY_H_
-#define LIBLEDGER_BINARY_H_
+#ifndef LIBLEDGER_INTERNAL_BINARY_H_
+#define LIBLEDGER_INTERNAL_BINARY_H_
 
 #include <stdint.h>
 #include <stddef.h>
@@ -32,4 +32,4 @@ extern size_t binary_ntoh_uint64(const void *in, uint64_t *out);
 }
 #endif
 
-#endif /* LIBLEDGER_BINARY_H_ */
+#endif /* LIBLEDGER_INTERNAL_BINARY_H_ */
