@@ -19,7 +19,7 @@ extern "C" {
 #define LEDGER_APDU_OFFSET_LC    0x04
 #define LEDGER_APDU_OFFSET_CDATA 0x05
 
-static inline bool ledger_apdu_sw_status_ok(uint8_t sw1, uint8_t sw2) {
+static inline bool ledger_apdu_sw_ok(uint8_t sw1, uint8_t sw2) {
 	return (sw1 == 0x90) && (sw2 == 0x00);
 }
 

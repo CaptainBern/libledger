@@ -29,11 +29,14 @@ struct ledger_transport_channel {
 
 struct ledger_transport_apdu_part {
     uint16_t sequence_id;
-    uint8_t data[LEDGER_TRANSPORT_PACKET_SIZE - 5]; // 5: comm_channel_id + command_tag + sequence_id
+    uint8_t data[LEDGER_TRANSPORT_PACKET_SIZE - 5];
 };
 
+/**
+ * The comm_channel_id is only used for APDU commands.
+ */
 struct ledger_transport_command {
-    uint16_t comm_channel_id; // Only used for APDU commands, but should be set to LEDGER_TRANSPORT_DEFAULT_COMM_CHANNEL_ID for other commands
+    uint16_t comm_channel_id;
     uint8_t command_tag;
 
     union {

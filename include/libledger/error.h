@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+// TODO: better/more errors
 enum ledger_error {
 	LEDGER_SUCCESS = 0,
 
@@ -20,7 +21,7 @@ enum ledger_error {
 	LEDGER_ERROR_UNKNOWN = -99
 };
 
-#define LEDGER_ERROR_COUNT 10
+#define LEDGER_ERROR_COUNT 9
 
 extern const char *ledger_error_string(int error);
 
