@@ -11,7 +11,8 @@ struct ledger_device {
 	pthread_mutex_t lock;
 };
 
-int ledger_open_device(char *path, struct ledger_device **device) {
+int ledger_open_device(char *path, struct ledger_device **device)
+{
 	hid_device *usb = hid_open_path(path);
 	if (!usb) {
 		return LEDGER_ERROR_INTERNAL;
@@ -29,7 +30,8 @@ int ledger_open_device(char *path, struct ledger_device **device) {
 	return LEDGER_SUCCESS;
 }
 
-void ledger_close_device(struct ledger_device *device) {
+void ledger_close_device(struct ledger_device *device)
+{
 	if (device) {
 		pthread_mutex_destroy(&device->lock);
 		hid_close(device->usb);
@@ -37,7 +39,8 @@ void ledger_close_device(struct ledger_device *device) {
 	}
 }
 
-int ledger_write(struct ledger_device *device, const uint8_t *data, size_t data_len, size_t *written) {
+int ledger_write(struct ledger_device *device, const uint8_t *data, size_t data_len, size_t *written)
+{
 	int n;
 	int ret;
 
@@ -59,7 +62,8 @@ int ledger_write(struct ledger_device *device, const uint8_t *data, size_t data_
 	return ret;
 }
 
-int ledger_read(struct ledger_device *device, uint8_t *data, size_t data_len, size_t *read, int timeout) {
+int ledger_read(struct ledger_device *device, uint8_t *data, size_t data_len, size_t *read, int timeout)
+{
 	int n;
 	int ret;
 

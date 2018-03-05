@@ -17,10 +17,10 @@ configure_file(
 )
 
 libledger_headers += files(
-    'libledger.h',
     'apdu.h',
     'device.h',
     'error.h',
+    'libledger.h',
     'transport.h'
 )
 

@@ -18,9 +18,11 @@ extern int ledger_open_device(char *path, struct ledger_device **device);
 
 extern void ledger_close_device(struct ledger_device *device);
 
-extern int ledger_write(struct ledger_device *device, const uint8_t *data, size_t data_len, size_t *written);
+extern int ledger_write(struct ledger_device *device,
+		const uint8_t *data, size_t data_len, size_t *written);
 
-extern int ledger_read(struct ledger_device *device, uint8_t *data, size_t data_len, size_t *read, int timeout);
+extern int ledger_read(struct ledger_device *device,
+		uint8_t *data, size_t data_len, size_t *read, int timeout);
 
 #ifdef __cplusplus
 }
