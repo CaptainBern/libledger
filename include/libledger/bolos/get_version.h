@@ -1,5 +1,5 @@
-#ifndef LIBLEDGER_BOLOS_VERSION_H_
-#define LIBLEDGER_BOLOS_VERSION_H_
+#ifndef LIBLEDGER_BOLOS_GET_VERSION_H_
+#define LIBLEDGER_BOLOS_GET_VERSION_H_
 
 #include <stdint.h>
 
@@ -17,7 +17,8 @@ struct ledger_bolos_version {
 	char *mcu_version;
 };
 
-extern int ledger_bolos_get_version(struct ledger_device *device, uint16_t comm_channel_id, struct ledger_bolos_version **version);
+extern struct ledger_bolos_version *ledger_bolos_get_version(
+		struct ledger_device *device, uint16_t comm_channel_id);
 
 extern void ledger_bolos_free_version(struct ledger_bolos_version *version);
 
@@ -25,4 +26,4 @@ extern void ledger_bolos_free_version(struct ledger_bolos_version *version);
 }
 #endif
 
-#endif /* LIBLEDGER_BOLOS_VERSION_H_ */
+#endif /* LIBLEDGER_BOLOS_GET_VERSION_H_ */

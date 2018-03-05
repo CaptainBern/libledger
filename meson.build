@@ -19,11 +19,11 @@ conf_data = configuration_data()
 
 # Dependencies
 threads = dependency('threads')
-hidapi = cc.find_library('libhidapi-libusb')
+hidapi  = cc.find_library('libhidapi-libusb')
 
 libledger_headers = []
-libledger_deps = []
-libledger_parts = []
+libledger_deps    = []
+libledger_parts   = []
 
 if get_option('bolos_support')
     subdir('bolos')

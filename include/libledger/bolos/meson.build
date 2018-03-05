@@ -1,7 +1,7 @@
 libledger_headers += files(
     'apdu.h',
     'bolos.h',
+    'get_version.h',
     'reset.h',
-    'target_id.h',
-    'version.h'
+    'validate_target_id.h'
 )
