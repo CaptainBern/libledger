@@ -15,81 +15,90 @@ static inline bool check_len(size_t len, size_t offset, size_t required)
 	return (len - offset) > required;
 }
 
-struct ledger_bolos_version *read_version(const uint8_t *data, size_t data_len)
+bool read_length(const uint8_t *buffer, size_t buffer_len, size_t *offset, size_t *length)
+{
+	if (!check_len(buffer_len, *offset, 1)) {
+		return false;
+	}
+
+	uint8_t _length = 0;
+	*offset += binary_ntoh_uint8(&buffer[*offset], &_length);
+	*length = _length;
+	return true;
+}
+
+bool read_string(const uint8_t *buffer, size_t buffer_len, size_t *offset, char **string)
+{
+	size_t _string_len = 0;
+	if (!read_length(buffer, buffer_len, offset, &_string_len)) {
+		return false;
+	}
+
+	char *_string = calloc(_string_len, sizeof(char));
+	if (!_string) {
+		return false;
+	}
+
+	*offset += binary_ntoh(&buffer[*offset], _string, _string_len);
+	*string = _string;
+	return true;
+}
+
+bool read_array(const uint8_t *buffer, size_t buffer_len, size_t *offset, uint8_t **array, size_t *array_len)
+{
+	size_t _array_len = 0;
+	if (!read_length(buffer, buffer_len, offset, &_array_len)) {
+		return false;
+	}
+
+	uint8_t *_array = calloc(_array_len, sizeof(uint8_t));
+	if (!_array) {
+		return false;
+	}
+
+	*offset += binary_ntoh(&buffer[*offset], _array, _array_len);
+	*array_len = _array_len;
+	*array = _array;
+	return true;
+}
+
+struct ledger_bolos_version *read_version(const uint8_t *buffer, size_t buffer_len)
 {
 	uint32_t target_id = 0;
 
-	uint8_t os_version_len = 0;
 	char *os_version = NULL;
 
-	uint8_t flags_len = 0;
+	size_t flags_len = 0;
 	uint8_t *flags = NULL;
 
-	uint8_t mcu_version_len = 0;
 	char *mcu_version = NULL;
 
 	size_t offset = 0;
 
 	// Read the target ID
-	if (!check_len(data_len, offset, sizeof target_id)) {
+	if (!check_len(buffer_len, offset, 4)) {
 		return NULL;
 	}
 
-	offset += binary_ntoh_uint32(&data[offset], &target_id);
+	offset += binary_ntoh_uint32(&buffer[offset], &target_id);
 
 	// Read the OS version
-	if (!check_len(data_len, offset, sizeof os_version_len)) {
+	if (!read_string(buffer, buffer_len, &offset, &os_version)) {
 		return NULL;
 	}
-
-	offset += binary_ntoh_uint8(&data[offset], &os_version_len);
-	if (!check_len(data_len, offset, os_version_len)) {
-		return NULL;
-	}
-
-	os_version = calloc(os_version_len, sizeof(char));
-	if (!os_version) {
-		return NULL;
-	}
-
-	offset += binary_ntoh(&data[offset], os_version, os_version_len);
 
 	// Read the flags
-	if (!check_len(data_len, offset, sizeof flags_len)) {
+	if (!read_array(buffer, buffer_len, &offset, &flags, &flags_len)) {
 		goto err_free_os_version;
 	}
-
-	offset += binary_ntoh_uint8(&data[offset], &flags_len);
-	if (!check_len(data_len, offset, flags_len)) {
-		goto err_free_os_version;
-	}
-
-	flags = calloc(flags_len, sizeof(uint8_t));
-	if (!flags) {
-		goto err_free_os_version;
-	}
-
-	offset += binary_ntoh(&data[offset], flags, flags_len);
 
 	// Read the MCU version
-	if (!check_len(data_len, offset, sizeof mcu_version_len)) {
+	if (!read_string(buffer, buffer_len, &offset, &mcu_version)) {
 		goto err_free_flags;
 	}
-
-	offset += binary_ntoh_uint8(&data[offset], &mcu_version_len);
-	if (!check_len(data_len, offset, mcu_version_len)) {
-		goto err_free_flags;
-	}
-
-	mcu_version = calloc(mcu_version_len, sizeof(char));
-	if (!mcu_version) {
-		goto err_free_flags;
-	}
-
-	offset += binary_ntoh(&data[offset], mcu_version, mcu_version_len);
 
 	// Check SW
-	if ((data_len - offset) != 2) {
+	if ((buffer_len - offset) != 2) {
 		goto err_free_mcu_version;
 	}
 
@@ -103,7 +112,6 @@ struct ledger_bolos_version *read_version(const uint8_t *data, size_t data_len)
 	version->flags_len = flags_len;
 	version->flags = flags;
 	version->mcu_version = mcu_version;
-
 	return version;
 
 err_free_mcu_version:
