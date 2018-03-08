@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libledger/internal/binary.h"
+#include "internal/binary.h"
 
 size_t binary_hton(void *out, const void *value, size_t value_len) {
 	if (out) {

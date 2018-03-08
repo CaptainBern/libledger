@@ -1,6 +1,7 @@
 #ifndef LIBLEDGER_DEVICE_H_
 #define LIBLEDGER_DEVICE_H_
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -14,15 +15,15 @@ extern "C" {
 
 struct ledger_device;
 
-extern int ledger_open_device(char *path, struct ledger_device **device);
+extern bool ledger_open(char *path, struct ledger_device **device);
 
-extern void ledger_close_device(struct ledger_device *device);
+extern void ledger_close(struct ledger_device *device);
 
-extern int ledger_write(struct ledger_device *device,
-		const uint8_t *data, size_t data_len, size_t *written);
+extern int ledger_get_error(struct ledger_device *device);
 
-extern int ledger_read(struct ledger_device *device,
-		uint8_t *data, size_t data_len, size_t *read, int timeout);
+extern char *ledger_get_error_debug_str(struct ledger_device *device);
+
+extern void ledger_clear_error(struct ledger_device *device);
 
 #ifdef __cplusplus
 }

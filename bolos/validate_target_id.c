@@ -1,7 +1,8 @@
 #include "libledger/apdu.h"
 #include "libledger/error.h"
 #include "libledger/transport.h"
-#include "libledger/internal/binary.h"
+
+#include "internal/binary.h"
 
 #include "libledger/bolos/apdu.h"
 #include "libledger/bolos/validate_target_id.h"
@@ -32,7 +33,6 @@ bool ledger_bolos_validate_target_id(struct ledger_device *device,
 	if (ledger_apdu_ok(reply->data, reply->len)) {
 		is_success = true;
 	}
-
 	ledger_transport_apdu_free(reply);
 	return is_success;
 }

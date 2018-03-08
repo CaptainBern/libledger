@@ -1,9 +1,11 @@
 #ifndef LIBLEDGER_TRANSPORT_H_
 #define LIBLEDGER_TRANSPORT_H_
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
+#include "libledger/buffer.h"
 #include "libledger/device.h"
 
 #ifdef __cplusplus
@@ -55,27 +57,19 @@ struct ledger_transport_reply {
     };
 };
 
-extern int ledger_transport_write(struct ledger_device *device,
-		struct ledger_transport_command *command);
+extern bool ledger_transport_write(struct ledger_device *device, struct ledger_transport_command *command);
 
-extern int ledger_transport_read(struct ledger_device *device,
-		struct ledger_transport_reply *out, int timeout);
+extern bool ledger_transport_read(struct ledger_device *device, struct ledger_transport_reply *out, int timeout);
 
-extern int ledger_transport_get_version(struct ledger_device *device,
-		uint32_t *version);
+extern bool ledger_transport_get_version(struct ledger_device *device, uint32_t *version);
 
-extern int ledger_transport_allocate_channel(struct ledger_device *device,
-		uint16_t *channel_id);
+extern bool ledger_transport_allocate_channel(struct ledger_device *device, uint16_t *channel_id);
 
-extern int ledger_transport_ping(struct ledger_device *device);
+extern bool ledger_transport_ping(struct ledger_device *device);
 
-extern int ledger_transport_write_apdu(struct ledger_device *device,
-		uint16_t comm_channel_id, const uint8_t *data, size_t data_len);
+extern bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t comm_channel_id, const struct ledger_buffer *buffer);
 
-extern int ledger_transport_read_apdu(struct ledger_device *device,
-		uint16_t comm_channel_id, struct ledger_transport_apdu **apdu);
-
-extern void ledger_transport_apdu_free(struct ledger_transport_apdu *apdu);
+extern bool ledger_transport_read_apdu(struct ledger_device *device, uint16_t comm_channel_id, struct ledger_buffer **buffer);
 
 #ifdef __cplusplus
 }

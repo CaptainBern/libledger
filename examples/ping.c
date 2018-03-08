@@ -17,9 +17,9 @@ int main(int argc, char *argv[]) {
 	struct ledger_device *device = NULL;
 	int ret = 0;
 
-	ret = ledger_open_device(dev_info->path, &device);
+	ret = ledger_open(dev_info->path, &device);
 	if (ret != LEDGER_SUCCESS) {
-		printf("Failed to open device: %s\n", ledger_error_string(ret));
+		printf("Failed to open device: %s\n", ledger_error_str(ret));
 		return EXIT_FAILURE;
 	}
 
@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 
 	ret = ledger_transport_ping(device);
 	if (ret != LEDGER_SUCCESS) {
-		printf("Ping failed: %s\n", ledger_error_string(ret));
+		printf("Ping failed: %s\n", ledger_error_str(ret));
 		return EXIT_FAILURE;
 	}
 
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 	uint16_t channel_id = 0;
 	ret = ledger_transport_allocate_channel(device, &channel_id);
 	if (ret != LEDGER_SUCCESS) {
-		printf("Failed to allocate channel %s\n", ledger_error_string(ret));
+		printf("Failed to allocate channel %s\n", ledger_error_str(ret));
 		return EXIT_FAILURE;
 	}
 
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
 	printf("\tReset success\n");
 	*/
 
-	ledger_close_device(device);
+	ledger_close(device);
 
 	hid_exit();
 

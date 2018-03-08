@@ -1,6 +1,7 @@
 libledger_core = static_library(
     'libledger_core',
     files(
+        'buffer.c',
         'device.c',
         'error.c',
         'transport.c',

@@ -18,7 +18,9 @@ configure_file(
 
 libledger_headers += files(
     'apdu.h',
+    'buffer.h',
     'device.h',
+    'device_internal.h',
     'error.h',
     'libledger.h',
     'transport.h'

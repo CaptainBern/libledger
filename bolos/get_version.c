@@ -5,7 +5,8 @@
 #include "libledger/apdu.h"
 #include "libledger/error.h"
 #include "libledger/transport.h"
-#include "libledger/internal/binary.h"
+
+#include "internal/binary.h"
 
 #include "libledger/bolos/apdu.h"
 #include "libledger/bolos/get_version.h"
@@ -73,6 +74,9 @@ struct ledger_bolos_version *read_version(const uint8_t *buffer, size_t buffer_l
 
 	char *mcu_version = NULL;
 
+	size_t mcu_hash_len = 0;
+	uint8_t *mcu_hash = NULL;
+
 	size_t offset = 0;
 
 	// Read the target ID
@@ -97,23 +101,32 @@ struct ledger_bolos_version *read_version(const uint8_t *buffer, size_t buffer_l
 		goto err_free_flags;
 	}
 
+	// Read the MCU hash
+	if (!read_array(buffer, buffer_len, &offset, &mcu_hash, &mcu_hash_len)) {
+		goto err_free_mcu_version;
+	}
+
 	// Check SW
 	if ((buffer_len - offset) != 2) {
-		goto err_free_mcu_version;
+		goto err_free_mcu_hash;
 	}
 
 	struct ledger_bolos_version *version = malloc(sizeof(struct ledger_bolos_version));
 	if (!version) {
-		goto err_free_mcu_version;
+		goto err_free_mcu_hash;
 	}
 
 	version->target_id = target_id;
 	version->os_version = os_version;
-	version->flags_len = flags_len;
-	version->flags = flags;
+	version->flags.flags_len = flags_len;
+	version->flags.flags = flags;
 	version->mcu_version = mcu_version;
+	version->mcu_hash.hash_len = mcu_hash_len;
+	version->mcu_hash.hash = mcu_hash;
 	return version;
 
+err_free_mcu_hash:
+	free(mcu_hash);
 err_free_mcu_version:
 	free(mcu_version);
 err_free_flags:
@@ -160,8 +173,9 @@ err_free_reply:
 void ledger_bolos_free_version(struct ledger_bolos_version *version) {
 	if (version) {
 		free(version->os_version);
-		free(version->flags);
+		free(version->flags.flags);
 		free(version->mcu_version);
+		free(version->mcu_hash.hash);
 		free(version);
 	}
 }
