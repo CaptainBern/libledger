@@ -17,7 +17,9 @@ struct ledger_cursor {
 	uintptr_t write_cursor;
 };
 
-extern void ledger_cursor_init(struct ledger_cursor *cursor, const struct ledger_buffer *buffer);
+extern void ledger_cursor_init_with_bytes(struct ledger_cursor *cursor, uint8_t *data, size_t len);
+
+extern void ledger_cursor_init_with_buffer(struct ledger_cursor *cursor, const struct ledger_buffer *buffer);
 
 extern void ledger_cursor_reset_read(struct ledger_cursor *cursor);
 

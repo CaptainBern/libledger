@@ -1,7 +1,6 @@
 #ifndef LIBLEDGER_BUFFER_H_
 #define LIBLEDGER_BUFFER_H_
 
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -10,8 +9,8 @@ extern "C" {
 #endif
 
 struct ledger_buffer {
-	size_t len;
 	uint8_t *data;
+	size_t len;
 };
 
 extern void ledger_buffer_init(struct ledger_buffer *buffer, uint8_t *data, size_t len);

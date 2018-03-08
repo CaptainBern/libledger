@@ -62,9 +62,9 @@ extern bool ledger_transport_allocate_channel(struct ledger_device *device, uint
 
 extern bool ledger_transport_ping(struct ledger_device *device);
 
-extern bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t comm_channel_id, const struct ledger_buffer *buffer);
+extern bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t comm_channel_id, const struct ledger_buffer *adpu);
 
-extern bool ledger_transport_read_apdu(struct ledger_device *device, uint16_t comm_channel_id, struct ledger_buffer **out);
+extern bool ledger_transport_read_apdu(struct ledger_device *device, uint16_t comm_channel_id, struct ledger_buffer **adpu);
 
 #ifdef __cplusplus
 }

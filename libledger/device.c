@@ -7,7 +7,7 @@
 #include "libledger/error.h"
 
 #include "libledger/device.h"
-#include "libledger/device_internal.h"
+#include "internal/device.h"
 
 struct ledger_device {
     hid_device *usb;

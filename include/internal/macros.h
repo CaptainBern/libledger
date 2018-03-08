@@ -1,7 +1,7 @@
 #ifndef LIBLEDGER_INTERNAL_MACRO_H_
 #define LIBLEDGER_INTERNAL_MACRO_H_
 
-#include "libledger/device_internal.h"
+#include "internal/device.h"
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
