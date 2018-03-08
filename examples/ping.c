@@ -14,12 +14,9 @@ int main(int argc, char *argv[]) {
 
 	printf("Found a Ledger Nano S: %s\n", dev_info->path);
 
-	struct ledger_device *device = NULL;
-	int ret = 0;
-
-	ret = ledger_open(dev_info->path, &device);
-	if (ret != LEDGER_SUCCESS) {
-		printf("Failed to open device: %s\n", ledger_error_str(ret));
+	struct ledger_device *device = ledger_open(dev_info->path);
+	if (!device) {
+		printf("Failed to open device!\n");
 		return EXIT_FAILURE;
 	}
 
@@ -27,10 +24,8 @@ int main(int argc, char *argv[]) {
 
 	// Ping the device
 	printf("Pinging device...\n");
-
-	ret = ledger_transport_ping(device);
-	if (ret != LEDGER_SUCCESS) {
-		printf("Ping failed: %s\n", ledger_error_str(ret));
+	if (!ledger_transport_ping(device)) {
+		printf("Failed to ping: %s -> %s\n", ledger_error_str(ledger_get_error(device)), ledger_get_error_debug_str(device));
 		return EXIT_FAILURE;
 	}
 
@@ -40,16 +35,15 @@ int main(int argc, char *argv[]) {
 	printf("Allocating Channel:\n");
 
 	uint16_t channel_id = 0;
-	ret = ledger_transport_allocate_channel(device, &channel_id);
-	if (ret != LEDGER_SUCCESS) {
-		printf("Failed to allocate channel %s\n", ledger_error_str(ret));
+	if (!ledger_transport_allocate_channel(device, &channel_id)) {
+		printf("Failed to allocate channel: %s -> %s\n", ledger_error_str(ledger_get_error(device)), ledger_get_error_debug_str(device));
 		return EXIT_FAILURE;
 	}
 
 	printf("\tChannel ID: 0x%x\n", channel_id);
 
 	// Request the BOLOS version
-	struct ledger_bolos_version *version = ledger_bolos_get_version(device, channel_id);
+	/*struct ledger_bolos_version *version = ledger_bolos_get_version(device, channel_id);
 	if (!version) {
 		printf("Failed to retrieve BOLOS version\n");
 		return EXIT_FAILURE;
@@ -71,17 +65,16 @@ int main(int argc, char *argv[]) {
 
 	ledger_bolos_free_version(version);
 
-	/*
+	*/
+
 	printf("Resetting device:\n");
 
-	ret = ledger_bolos_reset(device, channel_id);
-	if (ret != LEDGER_SUCCESS) {
-		printf("Failed to reset device: %s\n", ledger_error_string(ret));
+	if (!ledger_bolos_reset(device, channel_id)) {
+		printf("Failed to reset device: %s -> %s\n", ledger_error_str(ledger_get_error(device)), ledger_get_error_debug_str(device));
 		return EXIT_FAILURE;
 	}
 
 	printf("\tReset success\n");
-	*/
 
 	ledger_close(device);
 

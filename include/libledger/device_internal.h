@@ -14,10 +14,6 @@ extern "C" {
 
 extern void ledger_set_error(struct ledger_device *device, int error, char *error_debug_str);
 
-extern bool ledger_write(struct ledger_device *device, const struct ledger_buffer *buffer, size_t *written);
-
-extern bool ledger_read(struct ledger_device *device, struct ledger_buffer *buffer, size_t *read, int timeout);
-
 #ifdef __cplusplus
 }
 #endif

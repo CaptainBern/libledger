@@ -20,25 +20,24 @@ struct ledger_device {
 	pthread_mutex_t lock;
 };
 
-bool ledger_open(char *path, struct ledger_device **device)
+struct ledger_device *ledger_open(char *path)
 {
 	hid_device *usb = hid_open_path(path);
 	if (!usb) {
-		return false;
+		return NULL;
 	}
 
-	struct ledger_device *_device = malloc(sizeof(struct ledger_device));
+	struct ledger_device *device = malloc(sizeof(struct ledger_device));
 	if (!device) {
-		return false;
+		return NULL;
 	}
 
-	_device->usb = usb;
-	_device->error_state.error = LEDGER_SUCCESS;
-	_device->error_state.error_debug_str = "";
-	pthread_mutex_init(&_device->lock, NULL);
-	*device = _device;
+	device->usb = usb;
+	device->error_state.error = LEDGER_SUCCESS;
+	device->error_state.error_debug_str = "";
+	pthread_mutex_init(&device->lock, NULL);
 
-	return true;
+	return device;
 }
 
 void ledger_close(struct ledger_device *device)
@@ -48,37 +47,6 @@ void ledger_close(struct ledger_device *device)
 		hid_close(device->usb);
 		free(device);
 	}
-}
-
-void ledger_set_error(struct ledger_device *device, int error, char *error_debug_str)
-{
-	pthread_mutex_lock(&device->lock);
-	device->error_state.error = error;
-	device->error_state.error_debug_str = error_debug_str;
-	pthread_mutex_unlock(&device->lock);
-}
-
-int ledger_get_error(struct ledger_device *device)
-{
-	int errno = 0;
-	pthread_mutex_lock(&device->lock);
-	errno = device->error_state.error;
-	pthread_mutex_unlock(&device->lock);
-	return errno;
-}
-
-char *ledger_get_error_debug_str(struct ledger_device *device)
-{
-	char *error_debug_str = NULL;
-	pthread_mutex_lock(&device->lock);
-	error_debug_str = device->error_state.error_debug_str;
-	pthread_mutex_unlock(&device->lock);
-	return error_debug_str;
-}
-
-void ledger_clear_error(struct ledger_device *device)
-{
-	ledger_set_error(device, LEDGER_SUCCESS, "");
 }
 
 bool ledger_write(struct ledger_device *device, const struct ledger_buffer *buffer, size_t *written)
@@ -119,4 +87,35 @@ bool ledger_read(struct ledger_device *device, struct ledger_buffer *buffer, siz
 	}
 
 	return true;
+}
+
+void ledger_set_error(struct ledger_device *device, int error, char *error_debug_str)
+{
+	pthread_mutex_lock(&device->lock);
+	device->error_state.error = error;
+	device->error_state.error_debug_str = error_debug_str;
+	pthread_mutex_unlock(&device->lock);
+}
+
+int ledger_get_error(struct ledger_device *device)
+{
+	int errno = 0;
+	pthread_mutex_lock(&device->lock);
+	errno = device->error_state.error;
+	pthread_mutex_unlock(&device->lock);
+	return errno;
+}
+
+char *ledger_get_error_debug_str(struct ledger_device *device)
+{
+	char *error_debug_str = NULL;
+	pthread_mutex_lock(&device->lock);
+	error_debug_str = device->error_state.error_debug_str;
+	pthread_mutex_unlock(&device->lock);
+	return error_debug_str;
+}
+
+void ledger_clear_error(struct ledger_device *device)
+{
+	ledger_set_error(device, LEDGER_SUCCESS, "");
 }

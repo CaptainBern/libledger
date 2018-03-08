@@ -3,7 +3,6 @@
 
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,15 +14,20 @@ extern "C" {
 
 struct ledger_device;
 
-extern bool ledger_open(char *path, struct ledger_device **device);
+extern struct ledger_device *ledger_open(char *path);
 
 extern void ledger_close(struct ledger_device *device);
+
+extern bool ledger_write(struct ledger_device *device, const struct ledger_buffer *buffer, size_t *written);
+
+extern bool ledger_read(struct ledger_device *device, struct ledger_buffer *buffer, size_t *read, int timeout);
 
 extern int ledger_get_error(struct ledger_device *device);
 
 extern char *ledger_get_error_debug_str(struct ledger_device *device);
 
 extern void ledger_clear_error(struct ledger_device *device);
+
 
 #ifdef __cplusplus
 }

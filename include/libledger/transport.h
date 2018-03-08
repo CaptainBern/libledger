@@ -21,11 +21,6 @@ extern "C" {
 #define LEDGER_TRANSPORT_CMD_PING             0x02
 #define LEDGER_TRANSPORT_CMD_APDU             0x05
 
-struct ledger_transport_apdu {
-	size_t len;
-	uint8_t data[0];
-};
-
 struct ledger_transport_apdu_part {
 	uint16_t sequence_id;
 	uint8_t data[LEDGER_TRANSPORT_PACKET_LENGTH - 5];
@@ -69,7 +64,7 @@ extern bool ledger_transport_ping(struct ledger_device *device);
 
 extern bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t comm_channel_id, const struct ledger_buffer *buffer);
 
-extern bool ledger_transport_read_apdu(struct ledger_device *device, uint16_t comm_channel_id, struct ledger_buffer **buffer);
+extern bool ledger_transport_read_apdu(struct ledger_device *device, uint16_t comm_channel_id, struct ledger_buffer **out);
 
 #ifdef __cplusplus
 }

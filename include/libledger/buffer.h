@@ -14,7 +14,7 @@ struct ledger_buffer {
 	uint8_t *data;
 };
 
-extern void ledger_buffer_init(struct ledger_buffer *buffer, size_t len, const uint8_t *data);
+extern void ledger_buffer_init(struct ledger_buffer *buffer, uint8_t *data, size_t len);
 
 extern struct ledger_buffer *ledger_buffer_create(size_t len);
 

@@ -2,20 +2,31 @@
 #include <string.h>
 
 #include "internal/macros.h"
-#include "internal/binary.h"
+#include "internal/cursor.h"
 #include "libledger/error.h"
-#include "libledger/device_internal.h"
+#include "libledger/device.h"
 
 #include "libledger/transport.h"
 
 bool ledger_transport_write(struct ledger_device *device, struct ledger_transport_command *command)
 {
-	uint8_t buffer[LEDGER_TRANSPORT_PACKET_LENGTH];
-	size_t offset = 0;
+	uint8_t transport_packet[LEDGER_TRANSPORT_PACKET_LENGTH];
+	struct ledger_buffer buffer;
+	struct ledger_cursor cursor;
 
-	memset(&buffer, 0, sizeof buffer);
-	offset += binary_hton_uint16(&buffer[offset], command->comm_channel_id);
-	offset += binary_hton_uint8(&buffer[offset], command->command_tag);
+	ledger_buffer_init(&buffer, transport_packet, sizeof transport_packet);
+	ledger_cursor_init(&cursor, &buffer);
+	ledger_cursor_wipe(&cursor);
+
+	if (!ledger_cursor_write_u16(&cursor, command->comm_channel_id)) {
+		LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
+		return false;
+	}
+
+	if (!ledger_cursor_write_u8(&cursor, command->command_tag)) {
+		LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
+		return false;
+	}
 
 	switch (command->command_tag) {
 	case LEDGER_TRANSPORT_CMD_GET_VERSION:
@@ -24,8 +35,15 @@ bool ledger_transport_write(struct ledger_device *device, struct ledger_transpor
 		break;
 	}
 	case LEDGER_TRANSPORT_CMD_APDU: {
-		offset += binary_hton_uint16(&buffer[offset], command->apdu_part->sequence_id);
-		offset += binary_hton(&buffer[offset], command->apdu_part->data, sizeof command->apdu_part->data);
+		if (!ledger_cursor_write_u16(&cursor, command->apdu_part->sequence_id)) {
+			LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
+			return false;
+		}
+
+		if (!ledger_cursor_write_bytes(&cursor, command->apdu_part->data, sizeof command->apdu_part->data)) {
+			LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
+			return false;
+		}
 		break;
 	}
 	default:
@@ -34,11 +52,11 @@ bool ledger_transport_write(struct ledger_device *device, struct ledger_transpor
 	}
 
 	size_t written = 0;
-	if (!ledger_write(device, &buffer[0], sizeof buffer, &written)) {
+	if (!ledger_write(device, &buffer, &written)) {
 		return false;
 	}
 
-	if (written != sizeof buffer) {
+	if (written != buffer.len) {
 		LEDGER_SET_ERROR(device, LEDGER_ERROR_IO);
 		return false;
 	}
@@ -48,30 +66,46 @@ bool ledger_transport_write(struct ledger_device *device, struct ledger_transpor
 
 bool ledger_transport_read(struct ledger_device *device, struct ledger_transport_reply *out, int timeout)
 {
-	uint8_t buffer[LEDGER_TRANSPORT_PACKET_LENGTH];
-	size_t offset = 0;
+	uint8_t transport_packet[LEDGER_TRANSPORT_PACKET_LENGTH];
+	struct ledger_buffer buffer;
+	struct ledger_cursor cursor;
+
+	ledger_buffer_init(&buffer, transport_packet, sizeof transport_packet);
+	ledger_cursor_init(&cursor, &buffer);
+	ledger_cursor_wipe(&cursor);
 
 	size_t read = 0;
-	if (!ledger_read(device, &buffer[0], sizeof buffer, &read, timeout)) {
+	if (!ledger_read(device, &buffer, &read, timeout)) {
 		return false;
 	}
 
-	if (read != sizeof buffer) {
+	if (read != buffer.len) {
 		LEDGER_SET_ERROR(device, LEDGER_ERROR_IO);
 		return false;
 	}
 
 	struct ledger_transport_reply reply;
-	offset += binary_ntoh_uint16(&buffer[offset], &reply.comm_channel_id);
-	offset += binary_ntoh_uint8(&buffer[offset], &reply.command_tag);
+	if (!ledger_cursor_read_u16(&cursor, &reply.comm_channel_id)) {
+		LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
+	}
+
+	if (!ledger_cursor_read_u8(&cursor, &reply.command_tag)) {
+		LEDGER_SET_ERROR(device, LEDGER_ERROR_IO);
+	}
 
 	switch (reply.command_tag) {
 		case LEDGER_TRANSPORT_CMD_GET_VERSION: {
-			offset += binary_ntoh_uint32(&buffer[offset], &reply.version.version);
+			if (!ledger_cursor_read_u32(&cursor, &reply.version.version)) {
+				LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
+				return false;
+			}
 			break;
 		}
 		case LEDGER_TRANSPORT_CMD_ALLOCATE_CHANNEL: {
-			offset += binary_ntoh_uint16(&buffer[offset], &reply.channel.channel_id);
+			if (!ledger_cursor_read_u16(&cursor, &reply.channel.channel_id)) {
+				LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
+				return false;
+			}
 			break;
 		}
 		case LEDGER_TRANSPORT_CMD_PING: {
@@ -79,8 +113,15 @@ bool ledger_transport_read(struct ledger_device *device, struct ledger_transport
 			break;
 		}
 		case LEDGER_TRANSPORT_CMD_APDU: {
-			offset += binary_ntoh_uint16(&buffer[offset], &reply.apdu_part.sequence_id);
-			offset += binary_ntoh(&buffer[offset], &reply.apdu_part.data, sizeof reply.apdu_part.data);
+			if (!ledger_cursor_read_u16(&cursor, &reply.apdu_part.sequence_id)) {
+				LEDGER_SET_ERROR(device, LEDGER_ERROR_IO);
+				return false;
+			}
+
+			if (!ledger_cursor_read_bytes(&cursor, reply.apdu_part.data, sizeof reply.apdu_part.data)) {
+				LEDGER_SET_ERROR(device, LEDGER_ERROR_IO);
+				return false;
+			}
 			break;
 		}
 		default: {
@@ -174,96 +215,118 @@ bool ledger_transport_ping(struct ledger_device *device)
 
 bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t comm_channel_id, const struct ledger_buffer *buffer)
 {
+	struct ledger_transport_apdu_part apdu_part;
 	struct ledger_transport_command command = {
 		.comm_channel_id = comm_channel_id,
 		.command_tag = LEDGER_TRANSPORT_CMD_APDU,
 	};
+	command.apdu_part = &apdu_part;
 
-	size_t offset = 0;
-	for (int i = 0; offset < buffer->len; i++) {
-		struct ledger_transport_apdu_part apdu_part;
-		memset(&apdu_part.data, 0, sizeof apdu_part.data);
+	struct ledger_buffer out_buffer;
+	struct ledger_cursor out;
+	struct ledger_cursor in;
 
-		size_t written = 0;
-		if (i == 0) {
-			written = binary_hton_uint16(&apdu_part.data, buffer->len);
+	ledger_buffer_init(&out_buffer, apdu_part.data, sizeof apdu_part.data);
+	ledger_cursor_init(&out, &out_buffer);
+	ledger_cursor_init(&in, buffer);
+
+	uint16_t sequence_id = 0;
+	while (ledger_cursor_remaining(&in) > 0) {
+		ledger_cursor_wipe(&out);
+
+		if (sequence_id == 0) {
+			if (!ledger_cursor_write_u16(&out, buffer->len)) {
+				LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
+				return false;
+			}
 		}
 
-		size_t block_len = sizeof(apdu_part.data) - written;
-		if (block_len > (buffer->len - offset)) {
-			block_len = buffer->len - offset;
+		size_t block_len = ledger_cursor_available(&out);
+		if (block_len > ledger_cursor_remaining(&in)) {
+			block_len = ledger_cursor_remaining(&in);
 		}
 
-		offset += binary_hton(&apdu_part.data[written], &buffer->data[offset], block_len);
-
-		command.apdu_part = &apdu_part;
+		if (!ledger_cursor_copy(&out, &in, block_len)) {
+			LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
+			return false;
+		}
 
 		if (!ledger_transport_write(device, &command)) {
 			return false;
 		}
+
+		sequence_id++;
 	}
+
 	return true;
 }
 
 bool ledger_transport_read_apdu(struct ledger_device *device, uint16_t comm_channel_id, struct ledger_buffer **buffer)
 {
 	struct ledger_buffer *_buffer = NULL;
+	struct ledger_cursor out;
 
-	size_t offset = 0;
 	uint16_t sequence_id = 0;
-
 	do {
 		struct ledger_transport_reply reply;
-
-		if (!ledger_transport_read(device, &reply, LEDGER_TRANSPORT_DEFAULT_TIMEOUT) ) {
-			goto err_free_buffer;
+		if (!ledger_transport_read(device, &reply, LEDGER_TRANSPORT_DEFAULT_TIMEOUT)) {
+			goto err_destroy_buffer;
 		}
 
 		if (reply.comm_channel_id != comm_channel_id) {
 			LEDGER_SET_ERROR(device, LEDGER_ERROR_UNEXPECTED_REPLY);
-			goto err_free_buffer;
+			goto err_destroy_buffer;
 		}
 
 		if (reply.command_tag != LEDGER_TRANSPORT_CMD_APDU) {
 			LEDGER_SET_ERROR(device, LEDGER_ERROR_UNEXPECTED_REPLY);
-			goto err_free_buffer;
+			goto err_destroy_buffer;
 		}
 
 		if (reply.apdu_part.sequence_id != sequence_id) {
 			LEDGER_SET_ERROR(device, LEDGER_ERROR_UNEXPECTED_REPLY);
-			goto err_free_buffer;
+			goto err_destroy_buffer;
 		}
 
-		size_t read = 0;
+		struct ledger_buffer in_buffer;
+		struct ledger_cursor in;
+
+		ledger_buffer_init(&in_buffer, reply.apdu_part.data, sizeof reply.apdu_part.data);
+		ledger_cursor_init(&in, &in_buffer);
+
 		if (reply.apdu_part.sequence_id == 0) {
-			uint16_t response_data_len = 0;
-			read += binary_ntoh_uint16(&reply.apdu_part.data[0], &response_data_len);
-			if (response_data_len < 2) {
-				LEDGER_SET_ERROR(device, LEDGER_ERROR_INVALID_LENGTH);
+			uint16_t total_len = 0;
+			if (!ledger_cursor_read_u16(&in, &total_len)) {
+				LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
 				return false;
 			}
 
-			_buffer = ledger_buffer_create(response_data_len);
+			_buffer = ledger_buffer_create(total_len);
 			if (!_buffer) {
 				LEDGER_SET_ERROR(device, LEDGER_ERROR_NOMEM);
 				return false;
 			}
+
+			ledger_cursor_init(&out, _buffer);
 		}
 
-		size_t remaining = _buffer->len - offset;
-		if (remaining > (sizeof(reply.apdu_part.data) - read)) {
-			remaining = sizeof(reply.apdu_part.data) - read;
+		size_t remaining = ledger_cursor_remaining(&out);
+		if (remaining > ledger_cursor_available(&in)) {
+			remaining = ledger_cursor_available(&in);
 		}
 
-		offset += binary_ntoh(&reply.apdu_part.data[read], &_buffer->data[offset], remaining);
+		if (!ledger_cursor_copy(&out, &in, remaining)) {
+			LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
+			goto err_destroy_buffer;
+		}
 
 		sequence_id++;
-	} while (offset < _buffer->len);
+	} while (ledger_cursor_available(&out) > 0);
 
 	*buffer = _buffer;
 	return true;
 
-err_free_buffer:
+err_destroy_buffer:
 	ledger_buffer_destroy(_buffer);
 	return false;
 }

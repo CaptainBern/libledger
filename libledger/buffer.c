@@ -2,10 +2,10 @@
 
 #include "libledger/buffer.h"
 
-void ledger_buffer_init(struct ledger_buffer *buffer, size_t len, const uint8_t *data)
+void ledger_buffer_init(struct ledger_buffer *buffer, uint8_t *data, size_t len)
 {
-	buffer->len = len;
 	buffer->data = data;
+	buffer->len = len;
 }
 
 struct ledger_buffer *ledger_buffer_create(size_t len)
@@ -15,7 +15,7 @@ struct ledger_buffer *ledger_buffer_create(size_t len)
 		return NULL;
 	}
 
-	uint8_t *data = malloc(len);
+	uint8_t *data = calloc(len, sizeof(uint8_t));
 	if (!data) {
 		return NULL;
 	}
