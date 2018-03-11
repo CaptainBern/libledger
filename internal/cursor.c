@@ -15,21 +15,14 @@ void ledger_cursor_reset_read(struct ledger_cursor *cursor)
 	cursor->read_cursor = 0;
 }
 
-void ledger_cursor_reset_write(struct ledger_cursor *cursor)
+bool ledger_cursor_skip_read(struct ledger_cursor *cursor, size_t len)
 {
-	cursor->write_cursor = 0;
-}
+	if (ledger_cursor_remaining(cursor) < len) {
+		return false;
+	}
 
-void ledger_cursor_reset(struct ledger_cursor *cursor)
-{
-	ledger_cursor_reset_read(cursor);
-	ledger_cursor_reset_write(cursor);
-}
-
-void ledger_cursor_wipe(struct ledger_cursor *cursor)
-{
-	memset(cursor->buffer.data, 0, cursor->buffer.len);
-	ledger_cursor_reset(cursor);
+	cursor->read_cursor += len;
+	return true;
 }
 
 bool ledger_cursor_read_bytes(struct ledger_cursor *cursor, uint8_t *out, size_t len)
@@ -108,6 +101,21 @@ bool ledger_cursor_read_u64(struct ledger_cursor *cursor, uint64_t *out)
 		*out |= (uint64_t) buffer[1] << 48;
 		*out |= (uint64_t) buffer[0] << 56;
 	}
+	return true;
+}
+
+void ledger_cursor_reset_write(struct ledger_cursor *cursor)
+{
+	cursor->write_cursor = 0;
+}
+
+bool ledger_cursor_skip_write(struct ledger_cursor *cursor, size_t len)
+{
+	if (ledger_cursor_available(cursor) < len) {
+		return false;
+	}
+
+	cursor->write_cursor += len;
 	return true;
 }
 
@@ -196,4 +204,16 @@ bool ledger_cursor_copy(struct ledger_cursor *to, struct ledger_cursor *from, si
 	to->write_cursor += len;
 	from->read_cursor += len;
 	return true;
+}
+
+void ledger_cursor_reset(struct ledger_cursor *cursor)
+{
+	ledger_cursor_reset_read(cursor);
+	ledger_cursor_reset_write(cursor);
+}
+
+void ledger_cursor_wipe(struct ledger_cursor *cursor)
+{
+	memset(cursor->buffer.data, 0, cursor->buffer.len);
+	ledger_cursor_reset(cursor);
 }

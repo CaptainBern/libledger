@@ -21,11 +21,7 @@ extern void ledger_cursor_init(struct ledger_cursor *cursor, uint8_t *data, size
 
 extern void ledger_cursor_reset_read(struct ledger_cursor *cursor);
 
-extern void ledger_cursor_reset_write(struct ledger_cursor *cursor);
-
-extern void ledger_cursor_reset(struct ledger_cursor *cursor);
-
-extern void ledger_cursor_wipe(struct ledger_cursor *cursor);
+extern bool ledger_cursor_skip_read(struct ledger_cursor *cursor, size_t skip);
 
 extern bool ledger_cursor_read_bytes(struct ledger_cursor *cursor, uint8_t *out, size_t len);
 
@@ -38,6 +34,10 @@ extern bool ledger_cursor_read_u16(struct ledger_cursor *cursor, uint16_t *out);
 extern bool ledger_cursor_read_u32(struct ledger_cursor *cursor, uint32_t *out);
 
 extern bool ledger_cursor_read_u64(struct ledger_cursor *cursor, uint64_t *out);
+
+extern void ledger_cursor_reset_write(struct ledger_cursor *cursor);
+
+extern bool ledger_cursor_skip_write(struct ledger_cursor *cursor, size_t skip);
 
 extern bool ledger_cursor_write_bytes(struct ledger_cursor *cursor, const uint8_t *val, size_t len);
 
@@ -52,6 +52,10 @@ extern bool ledger_cursor_write_u32(struct ledger_cursor *cursor, const uint32_t
 extern bool ledger_cursor_write_u64(struct ledger_cursor *cursor, const uint64_t val);
 
 extern bool ledger_cursor_copy(struct ledger_cursor *to, struct ledger_cursor *from, size_t len);
+
+extern void ledger_cursor_reset(struct ledger_cursor *cursor);
+
+extern void ledger_cursor_wipe(struct ledger_cursor *cursor);
 
 /*
  * Return how much data is left to read

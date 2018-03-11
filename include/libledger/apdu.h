@@ -5,6 +5,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "libledger/buffer.h"
+#include "libledger/device.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -62,23 +65,9 @@ enum ledger_apdu_sw {
 	LEDGER_APDU_SW_SUCCESS                         = 0x9000
 };
 
-#define LEDGER_APDU_OK(x, y) (((x) == 0x90) && ((y) == 0x00))
+extern bool ledger_apdu_send(struct ledger_device *device, uint16_t comm_channel_id,  uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, struct ledger_buffer *data);
 
-static inline bool ledger_apdu_ok(uint8_t *apdu, size_t apdu_len)
-{
-	if (apdu_len < 2) {
-		return false;
-	}
-	return LEDGER_APDU_OK(apdu[apdu_len - 2], apdu[apdu_len - 1]);
-}
-
-struct ledger_apdu_header {
-	uint8_t cla;
-	uint8_t ins;
-	uint8_t p1;
-	uint8_t p2;
-	uint8_t lc;
-};
+extern bool ledger_apdu_read(struct ledger_device *device, uint16_t comm_channel_id, struct ledger_buffer **data, uint16_t *sw);
 
 #ifdef __cplusplus
 }

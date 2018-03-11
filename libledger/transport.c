@@ -10,6 +10,11 @@
 
 bool ledger_transport_write(struct ledger_device *device, struct ledger_transport_command *command)
 {
+	if (!command) {
+		LEDGER_SET_ERROR(device, LEDGER_ERROR_NULL);
+		return false;
+	}
+
 	uint8_t transport_packet[LEDGER_TRANSPORT_PACKET_LENGTH];
 	struct ledger_cursor cursor;
 
@@ -64,6 +69,11 @@ bool ledger_transport_write(struct ledger_device *device, struct ledger_transpor
 
 bool ledger_transport_read(struct ledger_device *device, struct ledger_transport_reply *out, int timeout)
 {
+	if (!out) {
+		LEDGER_SET_ERROR(device, LEDGER_ERROR_NULL);
+		return false;
+	}
+
 	uint8_t transport_packet[LEDGER_TRANSPORT_PACKET_LENGTH];
 	struct ledger_cursor cursor;
 
@@ -209,8 +219,13 @@ bool ledger_transport_ping(struct ledger_device *device)
 	return true;
 }
 
-bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t comm_channel_id, const struct ledger_buffer *adpu)
+bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t comm_channel_id, const struct ledger_buffer *apdu)
 {
+	if (!apdu) {
+		LEDGER_SET_ERROR(device, LEDGER_ERROR_NULL);
+		return false;
+	}
+
 	struct ledger_transport_apdu_part apdu_part;
 	struct ledger_transport_command command = {
 		.comm_channel_id = comm_channel_id,
@@ -222,14 +237,14 @@ bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t comm_cha
 	struct ledger_cursor in;
 
 	ledger_cursor_init(&out, apdu_part.data, sizeof apdu_part.data);
-	ledger_cursor_init(&in, adpu->data, adpu->len);
+	ledger_cursor_init(&in, apdu->data, apdu->len);
 
 	uint16_t sequence_id = 0;
 	while (ledger_cursor_remaining(&in) > 0) {
 		ledger_cursor_wipe(&out);
 
 		if (sequence_id == 0) {
-			if (!ledger_cursor_write_u16(&out, adpu->len)) {
+			if (!ledger_cursor_write_u16(&out, apdu->len)) {
 				LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
 				return false;
 			}
@@ -255,7 +270,7 @@ bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t comm_cha
 	return true;
 }
 
-bool ledger_transport_read_apdu(struct ledger_device *device, uint16_t comm_channel_id, struct ledger_buffer **adpu)
+bool ledger_transport_read_apdu(struct ledger_device *device, uint16_t comm_channel_id, struct ledger_buffer **apdu)
 {
 	struct ledger_buffer *buffer = NULL;
 
@@ -314,7 +329,7 @@ bool ledger_transport_read_apdu(struct ledger_device *device, uint16_t comm_chan
 		sequence_id++;
 	} while (ledger_cursor_available(&out) > 0);
 
-	*adpu = buffer;
+	*apdu = buffer;
 	return true;
 
 err_destroy_buffer:
