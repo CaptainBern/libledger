@@ -10,11 +10,6 @@
 
 bool ledger_transport_write(struct ledger_device *device, struct ledger_transport_command *command)
 {
-	if (!command) {
-		LEDGER_SET_ERROR(device, LEDGER_ERROR_NULL);
-		return false;
-	}
-
 	uint8_t transport_packet[LEDGER_TRANSPORT_PACKET_LENGTH];
 	struct ledger_cursor cursor;
 
@@ -69,11 +64,6 @@ bool ledger_transport_write(struct ledger_device *device, struct ledger_transpor
 
 bool ledger_transport_read(struct ledger_device *device, struct ledger_transport_reply *out, int timeout)
 {
-	if (!out) {
-		LEDGER_SET_ERROR(device, LEDGER_ERROR_NULL);
-		return false;
-	}
-
 	uint8_t transport_packet[LEDGER_TRANSPORT_PACKET_LENGTH];
 	struct ledger_cursor cursor;
 
@@ -221,11 +211,6 @@ bool ledger_transport_ping(struct ledger_device *device)
 
 bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t comm_channel_id, const struct ledger_buffer *apdu)
 {
-	if (!apdu) {
-		LEDGER_SET_ERROR(device, LEDGER_ERROR_NULL);
-		return false;
-	}
-
 	struct ledger_transport_apdu_part apdu_part;
 	struct ledger_transport_command command = {
 		.comm_channel_id = comm_channel_id,
