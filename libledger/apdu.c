@@ -59,7 +59,7 @@ bool ledger_apdu_compose(struct ledger_apdu_command *command, struct ledger_buff
 	return true;
 }
 
-bool ledger_parse_apdu(struct ledger_buffer *buffer, struct ledger_apdu_reply **reply)
+bool ledger_apdu_parse(struct ledger_buffer *buffer, struct ledger_apdu_reply **reply)
 {
 	struct ledger_cursor in;
 	ledger_cursor_init(&in, buffer->data, buffer->len);
@@ -119,7 +119,7 @@ bool ledger_apdu_exchange(struct ledger_device *device, uint16_t channel_id, str
 		return false;
 	}
 
-	if (!ledger_parse_apdu(reply_buffer, reply)) {
+	if (!ledger_apdu_parse(reply_buffer, reply)) {
 		LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
 		goto err_destroy_reply_buffer;
 	}
