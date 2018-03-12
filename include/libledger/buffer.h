@@ -17,8 +17,6 @@ extern void ledger_buffer_init(struct ledger_buffer *buffer, uint8_t *data, size
 
 extern struct ledger_buffer *ledger_buffer_create(size_t len);
 
-extern void ledger_buffer_resize(struct ledger_buffer *buffer, size_t len);
-
 extern void ledger_buffer_destroy(struct ledger_buffer *buffer);
 
 #ifdef __cplusplus

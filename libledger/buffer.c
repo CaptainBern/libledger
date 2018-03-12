@@ -26,17 +26,6 @@ struct ledger_buffer *ledger_buffer_create(size_t len)
 	return buffer;
 }
 
-void ledger_buffer_resize(struct ledger_buffer *buffer, size_t len)
-{
-	if (len == 0) {
-		ledger_buffer_destroy(buffer);
-		return;
-	}
-
-	buffer->data = realloc(buffer->data, len);
-	buffer->len = len;
-}
-
 void ledger_buffer_destroy(struct ledger_buffer *buffer)
 {
 	if (buffer) {

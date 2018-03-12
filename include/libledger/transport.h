@@ -15,41 +15,43 @@ extern "C" {
 #define LEDGER_TRANSPORT_DEFAULT_TIMEOUT         3500
 #define LEDGER_TRANSPORT_DEFAULT_COMM_CHANNEL_ID 0x0101
 
-#define LEDGER_TRANSPORT_PACKET_LENGTH        0x40
+#define LEDGER_TRANSPORT_PACKET_LENGTH 0x40
+#define LEDGER_TRANSPORT_HEADER_LENGTH 0x03
+
+#define LEDGER_TRANSPORT_APDU_HEADER_LENGTH (0x02 + LEDGER_TRANSPORT_HEADER_LENGTH)
+#define LEDGER_TRANSPORT_APDU_DATA_LEN      (LEDGER_TRANSPORT_PACKET_LENGTH - LEDGER_TRANSPORT_APDU_HEADER_LENGTH)
+
 #define LEDGER_TRANSPORT_CMD_GET_VERSION      0x00
 #define LEDGER_TRANSPORT_CMD_ALLOCATE_CHANNEL 0x01
 #define LEDGER_TRANSPORT_CMD_PING             0x02
 #define LEDGER_TRANSPORT_CMD_APDU             0x05
 
-struct ledger_transport_apdu_part {
+struct ledger_transport_header {
+	uint16_t comm_channel_id;
+	uint8_t command_tag;
+};
+
+struct ledger_transport_apdu {
 	uint16_t sequence_id;
-	uint8_t data[LEDGER_TRANSPORT_PACKET_LENGTH - 5];
+	uint8_t data[LEDGER_TRANSPORT_APDU_DATA_LEN];
 };
 
 struct ledger_transport_command {
-    uint16_t comm_channel_id;
-    uint8_t command_tag;
+	struct ledger_transport_header header;
 
     union {
-        struct ledger_transport_apdu_part *apdu_part;
-    };
+        struct ledger_transport_apdu apdu;
+    } payload;
 };
 
 struct ledger_transport_reply {
-    uint16_t comm_channel_id;
-    uint8_t command_tag;
+    struct ledger_transport_header header;
 
     union {
-		struct {
-			uint32_t version;
-		} version;
-
-		struct {
-			uint16_t channel_id;
-		} channel;
-
-		struct ledger_transport_apdu_part apdu_part;
-    };
+		uint32_t version;
+		uint16_t channel_id;
+		struct ledger_transport_apdu apdu;
+    } payload;
 };
 
 extern bool ledger_transport_write(struct ledger_device *device, struct ledger_transport_command *command);
