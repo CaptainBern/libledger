@@ -31,7 +31,7 @@ struct ledger_apdu_reply {
 
 extern void ledger_apdu_reply_destroy(struct ledger_apdu_reply *reply);
 
-extern bool ledger_apdu_exchange(struct ledger_device *device, uint16_t channel, struct ledger_apdu_command *command, struct ledger_apdu_reply **reply);
+extern bool ledger_apdu_exchange(struct ledger_device *device, uint16_t channel_id, struct ledger_apdu_command *command, struct ledger_apdu_reply **reply);
 
 #ifdef __cplusplus
 }

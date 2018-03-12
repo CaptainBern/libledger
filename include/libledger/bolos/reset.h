@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-extern bool ledger_bolos_reset(struct ledger_device *device, uint16_t comm_channel_id);
+extern bool ledger_bolos_reset(struct ledger_device *device, uint16_t channel_id);
 
 #ifdef __cplusplus
 }

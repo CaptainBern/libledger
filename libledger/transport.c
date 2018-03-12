@@ -219,11 +219,11 @@ bool ledger_transport_ping(struct ledger_device *device)
 	return true;
 }
 
-bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t comm_channel_id, const struct ledger_buffer *apdu)
+bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t channel_id, const struct ledger_buffer *apdu)
 {
 	struct ledger_transport_command command = {
 		.header = {
-			.comm_channel_id = comm_channel_id,
+			.comm_channel_id = channel_id,
 			.command_tag = LEDGER_TRANSPORT_CMD_APDU
 		}
 	};
@@ -265,7 +265,7 @@ bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t comm_cha
 	return true;
 }
 
-bool ledger_transport_read_apdu(struct ledger_device *device, uint16_t comm_channel_id, struct ledger_buffer **apdu)
+bool ledger_transport_read_apdu(struct ledger_device *device, uint16_t channel_id, struct ledger_buffer **apdu)
 {
 	struct ledger_buffer *buffer = NULL;
 
@@ -279,7 +279,7 @@ bool ledger_transport_read_apdu(struct ledger_device *device, uint16_t comm_chan
 			goto err_destroy_buffer;
 		}
 
-		if (reply.header.comm_channel_id != comm_channel_id) {
+		if (reply.header.comm_channel_id != channel_id) {
 			LEDGER_SET_ERROR(device, LEDGER_ERROR_UNEXPECTED_REPLY);
 			goto err_destroy_buffer;
 		}

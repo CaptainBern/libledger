@@ -98,7 +98,7 @@ err_destroy_apdu_reply:
 	return false;
 }
 
-bool ledger_apdu_exchange(struct ledger_device *device, uint16_t channel, struct ledger_apdu_command *command, struct ledger_apdu_reply **reply)
+bool ledger_apdu_exchange(struct ledger_device *device, uint16_t channel_id, struct ledger_apdu_command *command, struct ledger_apdu_reply **reply)
 {
 	uint8_t command_data[LEDGER_APDU_HEADER_LENGTH + (command->data ? command->data->len : 0)];
 	struct ledger_buffer command_buffer;
@@ -110,12 +110,12 @@ bool ledger_apdu_exchange(struct ledger_device *device, uint16_t channel, struct
 		return false;
 	}
 
-	if (!ledger_transport_write_apdu(device, channel, &command_buffer)) {
+	if (!ledger_transport_write_apdu(device, channel_id, &command_buffer)) {
 		return false;
 	}
 
 	struct ledger_buffer *reply_buffer;
-	if (!ledger_transport_read_apdu(device, channel, &reply_buffer)) {
+	if (!ledger_transport_read_apdu(device, channel_id, &reply_buffer)) {
 		return false;
 	}
 
