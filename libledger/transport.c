@@ -129,6 +129,7 @@ bool ledger_transport_read(struct ledger_device *device, struct ledger_transport
 	if (out) {
 		memcpy(out, &reply, sizeof reply);
 	}
+
 	return true;
 }
 
@@ -158,6 +159,7 @@ bool ledger_transport_get_version(struct ledger_device *device, uint32_t *versio
 	if (version) {
 		*version = reply.payload.version;
 	}
+
 	return true;
 }
 
@@ -187,6 +189,7 @@ bool ledger_transport_allocate_channel(struct ledger_device *device, uint16_t *c
 	if (channel_id) {
 		*channel_id = reply.payload.channel_id;
 	}
+
 	return true;
 }
 
@@ -212,6 +215,7 @@ bool ledger_transport_ping(struct ledger_device *device)
 		LEDGER_SET_ERROR(device, LEDGER_ERROR_UNEXPECTED_REPLY);
 		return false;
 	}
+
 	return true;
 }
 
@@ -321,6 +325,7 @@ bool ledger_transport_read_apdu(struct ledger_device *device, uint16_t comm_chan
 	} while (ledger_cursor_available(&out) > 0);
 
 	*apdu = buffer;
+
 	return true;
 
 err_destroy_buffer:

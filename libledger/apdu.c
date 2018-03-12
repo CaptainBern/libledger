@@ -90,7 +90,9 @@ bool ledger_parse_apdu(struct ledger_buffer *buffer, struct ledger_apdu_reply **
 	}
 
 	*reply = _reply;
+
 	return true;
+
 err_destroy_apdu_reply:
 	ledger_apdu_reply_destroy(_reply);
 	return false;
@@ -123,6 +125,7 @@ bool ledger_apdu_exchange(struct ledger_device *device, uint16_t channel, struct
 	}
 
 	return true;
+
 err_destroy_reply_buffer:
 	ledger_buffer_destroy(reply_buffer);
 	return false;
