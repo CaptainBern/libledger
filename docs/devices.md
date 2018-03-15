@@ -143,6 +143,7 @@ int error = ledger_get_error(handle);
 switch (ledger_get_error_type(error)) {
 case LEDGER_ERROR_TYPE_INTERNAL:
     printf("Internal error!\n");
+    break;
 case LEDGER_ERROR_TYPE_IO:
     printf("I/O error!\n");
     break;
