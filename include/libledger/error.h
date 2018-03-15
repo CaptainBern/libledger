@@ -14,6 +14,9 @@ extern "C" {
  */
 #define LEDGER_ERROR_VALUE_BITS 24
 
+/**
+ * enum ledger_error_type - An error type.
+ */
 enum ledger_error_type {
 	LEDGER_ERROR_TYPE_UNKNOWN = -1,
 	LEDGER_ERROR_TYPE_SUCCESS = 0,
@@ -30,6 +33,9 @@ enum ledger_error_type {
 #define LIBLEDGER_ERROR_PROTOCOL_START (LEDGER_ERROR_TYPE_PROTOCOL << LEDGER_ERROR_VALUE_BITS)
 #define LIBLEDGER_ERROR_OTHER_START (LEDGER_ERROR_TYPE_OTHER << LEDGER_ERROR_VALUE_BITS)
 
+/**
+ * enum ledger_error - An error code.
+ */
 enum ledger_error {
 	/* LEDGER_ERROR_TYPE_SUCCESS */
 	LEDGER_SUCCESS = LIBLEDGER_ERROR_SUCCESS_START,
@@ -52,6 +58,12 @@ enum ledger_error {
 	LEDGER_ERROR_OTHER = LIBLEDGER_ERROR_OTHER_START
 };
 
+/**
+ * ledger_error_get_type() - Get the type for the given error code.
+ * @error: Error code to retrieve the type from.
+ *
+ * Return: The ledger_error_type for the given error code.
+ */
 static inline int ledger_error_get_type(int error)
 {
 	int type = (error >> LEDGER_ERROR_VALUE_BITS) & 0xff;
@@ -63,6 +75,14 @@ static inline int ledger_error_get_type(int error)
 	return type;
 }
 
+/**
+ * ledger_error_str() - Get a string for the given error code.
+ * @error: Error code to return a string for.
+ *
+ * Return: A human-readable string for the given error code.
+ *         Returns 'unknown error' in case the error code is invalid
+ *         or unknown.
+ */
 extern const char *ledger_error_str(int error);
 
 #undef LIBLEDGER_ERROR_VALUE_BITS
