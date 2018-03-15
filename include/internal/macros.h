@@ -1,5 +1,5 @@
-#ifndef LIBLEDGER_INTERNAL_MACRO_H_
-#define LIBLEDGER_INTERNAL_MACRO_H_
+#ifndef LIBLEDGER_INTERNAL_MACROS_H_
+#define LIBLEDGER_INTERNAL_MACROS_H_
 
 #include "internal/device.h"
 
@@ -11,4 +11,4 @@
 
 #define LEDGER_SET_ERROR(device, error) ledger_set_error((device), (error), LEDGER_DEBUG_LINE)
 
-#endif /* LIBLEDGER_INTERNAL_MACRO_H_ */
+#endif /* LIBLEDGER_INTERNAL_MACROS_H_ */

@@ -23,14 +23,12 @@ struct ledger_device {
 struct ledger_device *ledger_open(char *path)
 {
 	hid_device *usb = hid_open_path(path);
-	if (!usb) {
+	if (!usb)
 		return NULL;
-	}
 
 	struct ledger_device *device = malloc(sizeof(struct ledger_device));
-	if (!device) {
+	if (!device)
 		return NULL;
-	}
 
 	device->usb = usb;
 	device->error_state.error = LEDGER_SUCCESS;
@@ -62,9 +60,8 @@ bool ledger_write(struct ledger_device *device, const struct ledger_buffer *buff
 		return false;
 	}
 
-	if (written) {
+	if (written)
 		*written = n;
-	}
 
 	return true;
 }
@@ -82,9 +79,8 @@ bool ledger_read(struct ledger_device *device, struct ledger_buffer *buffer, siz
 		return false;
 	}
 
-	if (read) {
+	if (read)
 		*read = n;
-	}
 
 	return true;
 }

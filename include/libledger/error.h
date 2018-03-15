@@ -60,7 +60,7 @@ static inline int ledger_error_get_type(int error)
 	} else if (type > LEDGER_ERROR_TYPE_COUNT) {
 		type = LEDGER_ERROR_TYPE_COUNT - 1;
 	}
-	return (enum ledger_error_type) type;
+	return type;
 }
 
 extern const char *ledger_error_str(int error);

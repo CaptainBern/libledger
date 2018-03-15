@@ -200,5 +200,4 @@ printf("%s\n", ledger_get_error_debug_str(handle));
 ...
 ```
 
-Note that this kind of error handling is only possible for functions that take
-a `struct ledger_device` as a parameter.
+These functions are thread-safe. Keep in mind though that only the *last* error is stored.

@@ -26,10 +26,6 @@ static const struct error_description error_description_table[] = {
 
 const char *ledger_error_str(int error)
 {
-	if (ledger_error_get_type(error) == LEDGER_ERROR_TYPE_OTHER) {
-		error = LEDGER_ERROR_OTHER;
-	}
-
 	for (int i = 0; i < (sizeof error_description_table / sizeof(struct error_description)); i++) {
 		if (error_description_table[i].error_code == error) {
 			return error_description_table[i].error_str;

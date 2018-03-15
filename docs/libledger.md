@@ -2,7 +2,7 @@
 
 ## Overview
 
-LibLedger is a C library that allows software to interface with
+LibLedger is a threadsafe C library that allows software to interface with
 [Ledger](https://www.ledgerwallet.com/) hardware wallets.
 
 Before getting started, we strongly recommend you
