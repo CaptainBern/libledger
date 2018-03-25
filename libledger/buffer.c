@@ -27,7 +27,9 @@ struct ledger_buffer *ledger_buffer_create(size_t len)
 void ledger_buffer_destroy(struct ledger_buffer *buffer)
 {
 	if (buffer) {
-		free(buffer->data);
+		if (buffer->data)
+			free(buffer->data);
+
 		free(buffer);
 	}
 }

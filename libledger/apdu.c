@@ -10,7 +10,9 @@
 void ledger_apdu_reply_destroy(struct ledger_apdu_reply *reply)
 {
 	if (reply) {
-		ledger_buffer_destroy(reply->data);
+		if (reply->data)
+			ledger_buffer_destroy(reply->data);
+
 		free(reply);
 	}
 }

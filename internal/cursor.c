@@ -17,9 +17,8 @@ void ledger_cursor_reset_read(struct ledger_cursor *cursor)
 
 bool ledger_cursor_skip_read(struct ledger_cursor *cursor, size_t len)
 {
-	if (ledger_cursor_remaining(cursor) < len) {
+	if (ledger_cursor_remaining(cursor) < len)
 		return false;
-	}
 
 	cursor->read_cursor += len;
 	return true;
@@ -27,14 +26,12 @@ bool ledger_cursor_skip_read(struct ledger_cursor *cursor, size_t len)
 
 bool ledger_cursor_read_bytes(struct ledger_cursor *cursor, uint8_t *out, size_t len)
 {
-	if (ledger_cursor_remaining(cursor) < len) {
+	if (ledger_cursor_remaining(cursor) < len)
 		return false;
-	}
 
 	void *ptr = cursor->buffer.data + cursor->read_cursor;
-	if (!ptr) {
+	if (!ptr)
 		return false;
-	}
 
 	memcpy(out, ptr, len);
 	cursor->read_cursor += len;
@@ -55,9 +52,8 @@ bool ledger_cursor_read_u16(struct ledger_cursor *cursor, uint16_t *out)
 {
 	uint8_t buffer[2];
 
-	if (!ledger_cursor_read_bytes(cursor, buffer, sizeof buffer)) {
+	if (!ledger_cursor_read_bytes(cursor, buffer, sizeof buffer))
 		return false;
-	}
 
 	if (out) {
 		*out = (uint16_t) buffer[1];
@@ -70,9 +66,8 @@ bool ledger_cursor_read_u32(struct ledger_cursor *cursor, uint32_t *out)
 {
 	uint8_t buffer[4];
 
-	if (!ledger_cursor_read_bytes(cursor, buffer, sizeof buffer)) {
+	if (!ledger_cursor_read_bytes(cursor, buffer, sizeof buffer))
 		return false;
-	}
 
 	if (out) {
 		*out = (uint32_t) buffer[3];
@@ -87,9 +82,8 @@ bool ledger_cursor_read_u64(struct ledger_cursor *cursor, uint64_t *out)
 {
 	uint8_t buffer[8];
 
-	if (!ledger_cursor_read_bytes(cursor, buffer, sizeof buffer)) {
+	if (!ledger_cursor_read_bytes(cursor, buffer, sizeof buffer))
 		return false;
-	}
 
 	if (out) {
 		*out = (uint64_t) buffer[7];
@@ -111,9 +105,8 @@ void ledger_cursor_reset_write(struct ledger_cursor *cursor)
 
 bool ledger_cursor_skip_write(struct ledger_cursor *cursor, size_t len)
 {
-	if (ledger_cursor_available(cursor) < len) {
+	if (ledger_cursor_available(cursor) < len)
 		return false;
-	}
 
 	cursor->write_cursor += len;
 	return true;
@@ -121,14 +114,12 @@ bool ledger_cursor_skip_write(struct ledger_cursor *cursor, size_t len)
 
 bool ledger_cursor_write_bytes(struct ledger_cursor *cursor, const uint8_t *val, size_t len)
 {
-	if (ledger_cursor_available(cursor) < len) {
+	if (ledger_cursor_available(cursor) < len)
 		return false;
-	}
 
 	void *ptr = cursor->buffer.data + cursor->write_cursor;
-	if (!ptr) {
+	if (!ptr)
 		return false;
-	}
 
 	memcpy(ptr, val, len);
 	cursor->write_cursor += len;
@@ -182,23 +173,19 @@ bool ledger_cursor_write_u64(struct ledger_cursor *cursor, const uint64_t val)
 
 bool ledger_cursor_copy(struct ledger_cursor *to, struct ledger_cursor *from, size_t len)
 {
-	if (ledger_cursor_remaining(from) < len) {
+	if (ledger_cursor_remaining(from) < len)
 		return false;
-	}
 
-	if (ledger_cursor_available(to) < len) {
+	if (ledger_cursor_available(to) < len)
 		return false;
-	}
 
 	void *ptr_to = to->buffer.data + to->write_cursor;
-	if (!ptr_to) {
+	if (!ptr_to)
 		return false;
-	}
 
 	void *ptr_from = from->buffer.data + from->read_cursor;
-	if (!ptr_from) {
+	if (!ptr_from)
 		return false;
-	}
 
 	memcpy(ptr_to, ptr_from, len);
 	to->write_cursor += len;

@@ -68,7 +68,7 @@ static inline int ledger_error_get_type(int error)
 {
 	int type = (error >> LEDGER_ERROR_VALUE_BITS) & 0xff;
 	if (type < LEDGER_ERROR_TYPE_UNKNOWN) {
-		type = LEDGER_ERROR_TYPE_INTERNAL;
+		type = LEDGER_ERROR_TYPE_UNKNOWN;
 	} else if (type > LEDGER_ERROR_TYPE_COUNT) {
 		type = LEDGER_ERROR_TYPE_COUNT - 1;
 	}

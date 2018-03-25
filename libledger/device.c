@@ -10,7 +10,7 @@
 #include "internal/device.h"
 
 struct ledger_device {
-    hid_device *usb;
+	hid_device *usb;
 
 	struct {
 		int error;
