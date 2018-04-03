@@ -74,9 +74,9 @@ struct ledger_transport_apdu {
 struct ledger_transport_command {
 	struct ledger_transport_header header;
 
-    union {
-        struct ledger_transport_apdu apdu;
-    } payload;
+	union {
+		struct ledger_transport_apdu apdu;
+	} payload;
 };
 
 /**
