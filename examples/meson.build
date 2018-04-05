@@ -8,3 +8,5 @@ libshared = static_library(
 executable('ping', 'ping.c', dependencies: libledger, link_with: libshared)
 
 executable('reset', 'reset.c', dependencies: libledger, link_with: libshared)
+
+executable('version', 'version.c', dependencies: libledger, link_with: libshared)

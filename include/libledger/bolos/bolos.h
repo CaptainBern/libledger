@@ -15,14 +15,14 @@ struct ledger_bolos_version {
 	char *os_version;
 
 	struct {
-		size_t flags_len;
+		size_t len;
 		uint8_t *flags;
 	} flags;
 
 	char *mcu_version;
 
 	struct {
-		size_t hash_len;
+		size_t len;
 		uint8_t *hash;
 	} mcu_hash;
 };

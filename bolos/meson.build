@@ -4,6 +4,7 @@ libledger_bolos = static_library(
     'libledger_bolos',
     files(
         'reset.c',
+        'version.c',
     ),
     include_directories: libledger_inc,
     dependencies: [

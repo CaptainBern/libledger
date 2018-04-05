@@ -15,6 +15,8 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
+	printf("Ping!\n");
+
 	ledger_close(device);
 
 	return EXIT_SUCCESS;

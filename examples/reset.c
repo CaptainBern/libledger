@@ -15,6 +15,8 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
+	printf("Device reset!\n");
+
 	ledger_close(device);
 
 	return EXIT_SUCCESS;
