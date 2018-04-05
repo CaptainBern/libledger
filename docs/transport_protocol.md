@@ -130,7 +130,7 @@ The packet Sequence ID, starts at 0.
 
 **APDU Payload Part**: remainder of the packet
 
-Part of an APDU payload.
+Part of an [APDU payload](#apdu-payload]).
 
 ## APDU Payload
 
