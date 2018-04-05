@@ -105,7 +105,12 @@ Check the data-link. PING commands/replies do not have any data.
 
 ## APDU
 
-Send an APDU to the device.
+Send or receive an [APDU](./apdu.md) to/from the device. APDUs need
+to be framed because they can exceed 64 bytes. *Every* APDU needs to
+be framed, whether it exceeds 64 bytes in length or not. When an APDU
+fits in a single LTP packet, it can be send using a single packet.
+
+Format:
 
 ```
  0                   1
@@ -113,11 +118,55 @@ Send an APDU to the device.
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |          Sequence ID          |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                               |
++       APDU Payload Part       +
+|                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
 **Sequence ID**: 16 bits
 
-The packet Sequence ID. For the first packet this value is set to 0.
+The packet Sequence ID, starts at 0.
 
-The remainder of the packet is APDU data. Note that only the last packet
-can be padded with zeroes.
+**APDU Payload Part**: remainder of the packet
+
+Part of an APDU payload.
+
+## APDU Payload
+
+An APDU payload is formatted as follows:
+
+```
+ 0                   1
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|          APDU Length          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                               |
++              APDU             +
+|                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+```
+
+**APDU Length**: 16 bits
+
+The total length of the APDU.
+
+**APDU**: Length equal to *APDU Length* in bytes
+
+The actual APDU, as described [here](./apdu.md).
+
+### APDU Payload Framing
+
+APDU payloads are split up in several smaller parts to be
+able to transmit them using the LTP.
+
+After you made your APDU payload you should split it up in parts of
+maximum 59<sup id="a1">[1](#f1)</sup> bytes each. Send each part in order using an [LTP APDU](#apdu) packet,
+make sure to increase the `Sequence ID` for each part!
+
+It is important to notice that the `Payload Part` of the first [LTP APDU](#apdu) packet
+contains the `APDU Length`, which you then can use to check when you have
+received all the APDU payload parts.
+
+<b id="f1">1</b> 59 bytes -> 64 (LTP packet size) - 5 (communication channel ID + command tag + [APDU](#apdu) sequence id) [↩](#a1)

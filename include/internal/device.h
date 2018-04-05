@@ -1,5 +1,5 @@
-#ifndef LIBLEDGER_DEVICE_INTERNAL_H_
-#define LIBLEDGER_DEVICE_INTERNAL_H_
+#ifndef LIBLEDGER_INTERNAL_DEVICE_H_
+#define LIBLEDGER_INTERNAL_DEVICE_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -18,4 +18,4 @@ extern void ledger_set_error(struct ledger_device *device, int error, char *erro
 }
 #endif
 
-#endif /* LIBLEDGER_DEVICE_INTERNAL_H_ */
+#endif /* LIBLEDGER_INTERNAL_DEVICE_H_ */

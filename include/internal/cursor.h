@@ -1,5 +1,5 @@
-#ifndef LIBLEDGER_CURSOR_H_
-#define LIBLEDGER_CURSOR_H_
+#ifndef LIBLEDGER_INTERNAL_CURSOR_H_
+#define LIBLEDGER_INTERNAL_CURSOR_H_
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -77,4 +77,4 @@ static inline size_t ledger_cursor_available(struct ledger_cursor *cursor)
 }
 #endif
 
-#endif /* LIBLEDGER_CURSOR_H_ */
+#endif /* LIBLEDGER_INTERNAL_CURSOR_H_ */
