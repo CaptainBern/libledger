@@ -1,7 +1,7 @@
 #include "libledger/apdu.h"
 #include "libledger/bolos/apdu.h"
 
-#include "libledger/bolos/reset.h"
+#include "libledger/bolos/bolos.h"
 
 bool ledger_bolos_reset(struct ledger_device *device, uint16_t channel_id)
 {
@@ -9,10 +9,8 @@ bool ledger_bolos_reset(struct ledger_device *device, uint16_t channel_id)
 			LEDGER_BOLOS_APDU_CLA, LEDGER_BOLOS_APDU_INS_RESET, 0x00, 0x00, NULL);
 
 	struct ledger_apdu_reply *reply = NULL;
-
-	if (!ledger_apdu_exchange(device, channel_id, &command, &reply)) {
+	if (!ledger_apdu_exchange(device, channel_id, &command, &reply))
 		return false;
-	}
 
 	bool success = reply->status == 0x9000;
 	ledger_apdu_reply_destroy(reply);
