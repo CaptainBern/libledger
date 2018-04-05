@@ -162,11 +162,12 @@ APDU payloads are split up in several smaller parts to be
 able to transmit them using the LTP.
 
 After you made your APDU payload you should split it up in parts of
-maximum 59<sup id="a1">[1](#f1)</sup> bytes each. Send each part in order using an [LTP APDU](#apdu) packet,
-make sure to increase the `Sequence ID` for each part!
+maximum 59<sup id="a1">[1](#f1)</sup> bytes each. Send each part with a [LTP APDU](#apdu) packet.
+Make sure to send the parts in the correct order, and to increase the
+`Sequence ID` by 1 for each part.
 
 It is important to notice that the `Payload Part` of the first [LTP APDU](#apdu) packet
-contains the `APDU Length`, which you then can use to check when you have
-received all the APDU payload parts.
+contains the `APDU Length`, which you must use to check whether or not you
+have received all of the APDU payload parts.
 
 <b id="f1">1</b> 59 bytes -> 64 (LTP packet size) - 5 (communication channel ID + command tag + [APDU](#apdu) sequence id) [↩](#a1)
