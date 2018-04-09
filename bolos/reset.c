@@ -1,3 +1,5 @@
+#include "internal/macros.h"
+#include "libledger/error.h"
 #include "libledger/apdu.h"
 #include "libledger/bolos/apdu.h"
 
@@ -13,6 +15,10 @@ bool ledger_bolos_reset(struct ledger_device *device, uint16_t channel_id)
 		return false;
 
 	bool success = reply->status == 0x9000;
+	if (!success)
+		LEDGER_SET_ERROR(device, LEDGER_ERROR_OTHER);
+
 	ledger_apdu_reply_destroy(reply);
+
 	return success;
 }
