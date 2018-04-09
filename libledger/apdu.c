@@ -40,7 +40,7 @@ bool ledger_apdu_compose(struct ledger_apdu_command *command, struct ledger_buff
 		if (command->data->len > LEDGER_APDU_MAX_DATA_LENGTH)
 			return false;
 
-		if (!ledger_cursor_write_u8(&out, command->data->len))
+		if (!ledger_cursor_write_u8(&out, (command->data->len & 0xff)))
 			return false;
 
 		if (!ledger_cursor_write_bytes(&out, command->data->data, command->data->len))
