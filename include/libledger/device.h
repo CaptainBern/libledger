@@ -21,7 +21,7 @@ extern "C" {
  * struct ledger_device - A ledger device handle.
  *
  * An opaque struct that holds the underlying
- * USB device handle
+ * USB device handle.
  */
 struct ledger_device;
 
