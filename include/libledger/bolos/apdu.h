@@ -7,6 +7,7 @@
 #define LEDGER_BOLOS_APDU_INS_GET_VERSION        0x01
 #define LEDGER_BOLOS_APDU_INS_RESET              0x02
 #define LEDGER_BOLOS_APDU_INS_VALIDATE_TARGET_ID 0x04
+#define LEDGER_BOLOS_APDU_INS_SET_PASSPHRASE     0xD0
 #define LEDGER_BOLOS_APDU_INS_ECHO               0xff
 
 // Better naming?

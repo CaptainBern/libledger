@@ -1,9 +1,10 @@
 #include "internal/macros.h"
+
 #include "libledger/error.h"
 #include "libledger/apdu.h"
-#include "libledger/bolos/apdu.h"
+#include "libledger/bolos/constants.h"
 
-#include "libledger/bolos/bolos.h"
+#include "libledger/bolos/reset.h"
 
 bool ledger_bolos_reset(struct ledger_device *device, uint16_t channel_id)
 {

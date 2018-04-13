@@ -1,10 +1,11 @@
 #include "internal/cursor.h"
 #include "internal/macros.h"
+
 #include "libledger/error.h"
 #include "libledger/apdu.h"
-#include "libledger/bolos/apdu.h"
+#include "libledger/bolos/constants.h"
 
-#include "libledger/bolos/bolos.h"
+#include "libledger/bolos/validate.h"
 
 bool ledger_bolos_validate_target_id(struct ledger_device *device, uint16_t channel_id, uint32_t target_id)
 {
@@ -15,7 +16,7 @@ bool ledger_bolos_validate_target_id(struct ledger_device *device, uint16_t chan
 	ledger_cursor_write_u32(&cursor, target_id);
 
 	struct ledger_apdu_command command = LEDGER_APDU_COMMAND_INITIALIZER(
-			LEDGER_BOLOS_APDU_CLA, LEDGER_BOLOS_APDU_INS_VALIDATE_TARGET_ID, 0x0, 0x0, &cursor.buffer);
+			LEDGER_BOLOS_APDU_CLA, LEDGER_BOLOS_APDU_INS_VALIDATE, 0x0, 0x0, &cursor.buffer);
 
 	struct ledger_apdu_reply *reply = NULL;
 	if (!ledger_apdu_exchange(device, channel_id, &command, &reply))
