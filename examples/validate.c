@@ -11,12 +11,11 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	if (!ledger_bolos_reset(device, LEDGER_TRANSPORT_DEFAULT_COMM_CHANNEL_ID)) {
-		printf("Reset failed: %s\n", ledger_error_str(ledger_get_error(device)));
+	uint32_t target_id = 0x31100003;
+	if (!ledger_bolos_validate_target_id(device, LEDGER_TRANSPORT_DEFAULT_COMM_CHANNEL_ID, target_id)) {
+		printf("Failed to validate: %s\n", ledger_error_str(ledger_get_error(device)));
 		return EXIT_FAILURE;
 	}
-
-	printf("Device reset!\n");
 
 	ledger_close(device);
 

@@ -3,7 +3,8 @@
 
 #include "common/common.h"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 	struct ledger_device *device = get_ledger_nano_s();
 	if (!device) {
 		printf("Ledger Nano S not found!\n");
@@ -20,6 +21,7 @@ int main(int argc, char *argv[]) {
 	printf("\ttarget ID: %x\n", version->target_id);
 	printf("\tOS version: %s\n", version->os_version);
 	printf("\tMCU version: %s\n", version->mcu_version);
+	printf("\tMCU hash: %s\n", version->mcu_hash.len > 0 ? "yes" : "no");
 
 	ledger_bolos_version_destroy(version);
 

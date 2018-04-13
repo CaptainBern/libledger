@@ -3,7 +3,8 @@
 
 #include "common/common.h"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 	struct ledger_device *device = get_ledger_nano_s();
 	if (!device) {
 		printf("Ledger Nano S not found!\n");
