@@ -21,7 +21,8 @@ static const struct error_description error_description_table[] = {
 	{ LEDGER_ERROR_UNEXPECTED_REPLY, "unexpected reply" },
 	{ LEDGER_ERROR_INVALID_COMMAND, "invalid command" },
 
-	{ LEDGER_ERROR_OTHER, "other error" }
+	{ LEDGER_ERROR_OTHER, "other error" },
+	{ LEDGER_ERROR_BUFFER_TOO_SMALL, "buffer too small" }
 };
 
 const char *ledger_error_str(int error)

@@ -1,15 +1,14 @@
-openssl = dependency('openssl')
-
+mbedcrypto = cc.find_library('libmbedcrypto')
 libledger_bolos = static_library(
     'libledger_bolos',
     files(
         'reset.c',
         'validate.c',
         'version.c',
-        'secret.c'
+        'secure.c'
     ),
     include_directories: libledger_inc,
     dependencies: [
-        openssl
+        mbedcrypto
     ]
 )

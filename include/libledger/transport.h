@@ -5,7 +5,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "libledger/buffer.h"
 #include "libledger/device.h"
 
 #ifdef __cplusplus
@@ -160,22 +159,23 @@ extern bool ledger_transport_ping(struct ledger_device *device);
  * ledger_transport_write_apdu() - Write an APDU to the device.
  * @device: A ledger_device pointer returned from ledger_open().
  * @channel_id: The channel ID.
- * @apdu: The APDU to send.
+ * @buffer: The APDU buffer to write.
+ * @buffer_len: Length of the APDU buffer.
  *
  * Write APDUs to the device. The function will take care of properly splitting up
  * the APDU in chunks in case it is too big for a single transport message.
  *
  * Return: True on success or false on failure.
  */
-extern bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t channel_id, const struct ledger_buffer *apdu);
+extern bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t channel_id, const uint8_t *buffer, size_t buffer_len);
 
 /**
  * ledger_transport_read_apdu() - Read an APDU from the device.
  * @device: A ledger_device pointer returned from ledger_open().
  * @channel_id: The channel ID.
- * @apdu: Pointer to the location where the APDU should be stored.
- *        ledger_buffer_destroy() should be called on the apdu after
- *        you are done using it.
+ * @len: Length of the actual APDU reply.
+ * @buffer: Buffer for the APDU reply.
+ * @buffer_len: Length of the reply buffer.
  *
  * Read APDUs from the device. The function will take care of reconstructing the
  * APDU into a single buffer in case it was too big to fit in a single
@@ -183,7 +183,7 @@ extern bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t c
  *
  * Return: True on success or false on failure.
  */
-extern bool ledger_transport_read_apdu(struct ledger_device *device, uint16_t channel_id, struct ledger_buffer **apdu);
+extern bool ledger_transport_read_apdu(struct ledger_device *device, uint16_t channel_id, size_t *len, uint8_t *buffer, size_t buffer_len);
 
 #ifdef __cplusplus
 }

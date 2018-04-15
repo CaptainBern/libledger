@@ -47,12 +47,12 @@ void ledger_close(struct ledger_device *device)
 	}
 }
 
-bool ledger_write(struct ledger_device *device, const struct ledger_buffer *buffer, size_t *written)
+bool ledger_write(struct ledger_device *device, size_t *written, const uint8_t *buffer, size_t buffer_len)
 {
 	int n;
 
 	pthread_mutex_lock(&device->lock);
-	n = hid_write(device->usb, buffer->data, buffer->len);
+	n = hid_write(device->usb, buffer, buffer_len);
 	pthread_mutex_unlock(&device->lock);
 
 	if (n < 0) {
@@ -66,12 +66,12 @@ bool ledger_write(struct ledger_device *device, const struct ledger_buffer *buff
 	return true;
 }
 
-bool ledger_read(struct ledger_device *device, struct ledger_buffer *buffer, size_t *read, int timeout)
+bool ledger_read(struct ledger_device *device, size_t *read, uint8_t *buffer, size_t buffer_len, int timeout)
 {
 	int n;
 
 	pthread_mutex_lock(&device->lock);
-	n = hid_read_timeout(device->usb, buffer->data, buffer->len, timeout);
+	n = hid_read_timeout(device->usb, buffer, buffer_len, timeout);
 	pthread_mutex_unlock(&device->lock);
 
 	if (n < 0) {
@@ -79,8 +79,7 @@ bool ledger_read(struct ledger_device *device, struct ledger_buffer *buffer, siz
 		return false;
 	}
 
-	if (read)
-		*read = n;
+	*read = n;
 
 	return true;
 }

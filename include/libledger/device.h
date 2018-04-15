@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,9 +50,9 @@ extern void ledger_close(struct ledger_device *device);
 /**
  * ledger_write() - Write raw data to the device.
  * @device: A ledger_device pointer returned from ledger_open().
- * @buffer: The data to send to the device.
- * @written: Pointer location to the amount of bytes actually
- *           written. This value may be NULL.
+ * @written: The amount of bytes actually written. This value may be NULL.
+ * @buffer: The buffer to write to the device.
+ * @buffer_len: Length of the buffer.
  *
  * You should generally avoid using this function and instead
  * use the dedicated ledger_transport_* and ledger_apdu_* functions
@@ -61,14 +62,14 @@ extern void ledger_close(struct ledger_device *device);
  *
  * Return: True on success or false on failure.
  */
-extern bool ledger_write(struct ledger_device *device, const struct ledger_buffer *buffer, size_t *written);
+extern bool ledger_write(struct ledger_device *device, size_t *written, const uint8_t *buffer, size_t buffer_len);
 
 /**
  * ledger_read() - Read raw data from the device.
  * @device: A ledger_device pointer returned from ledger_open().
- * @buffer: The data to read from the device.
- * @read: Pointer location to the amount of bytes actually read.
- *        This value may be NULL.
+ * @read: The amount of bytes actually read.
+ * @buffer: The buffer to read from the device.
+ * @buffer_len: Length of the buffer.
  * @timeout: Timeout in milliseconds or -1 for blocking wait.
  *
  * You should generally avoid using this function and instead
@@ -79,7 +80,7 @@ extern bool ledger_write(struct ledger_device *device, const struct ledger_buffe
  *
  * Return: True on success or false on failure.
  */
-extern bool ledger_read(struct ledger_device *device, struct ledger_buffer *buffer, size_t *read, int timeout);
+extern bool ledger_read(struct ledger_device *device, size_t *read, uint8_t *buffer, size_t buffer_len, int timeout);
 
 /**
  * ledger_get_error() - Returns the last error which occurred.

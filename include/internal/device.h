@@ -4,8 +4,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "libledger/buffer.h"
-
 #include "libledger/device.h"
 
 #ifdef __cplusplus

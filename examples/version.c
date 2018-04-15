@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 
 	struct ledger_bolos_version *version = NULL;
 	if (!ledger_bolos_get_version(device, LEDGER_TRANSPORT_DEFAULT_COMM_CHANNEL_ID, &version)) {
-		printf("Failed to retrieve version: %s\n", ledger_error_str(ledger_get_error(device)));
+		printf("Failed to retrieve version: %s -> %s\n", ledger_error_str(ledger_get_error(device)), ledger_get_error_debug_str(device));
 		return EXIT_FAILURE;
 	}
 

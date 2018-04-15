@@ -50,7 +50,7 @@ bool ledger_transport_write(struct ledger_device *device, struct ledger_transpor
 	}
 
 	size_t written = 0;
-	if (!ledger_write(device, &out.buffer, &written))
+	if (!ledger_write(device, &written, transport_packet, sizeof(transport_packet)))
 		return false;
 
 	if (written != out.buffer.len) {
@@ -70,7 +70,7 @@ bool ledger_transport_read(struct ledger_device *device, struct ledger_transport
 	ledger_cursor_wipe(&in);
 
 	size_t read = 0;
-	if (!ledger_read(device, &in.buffer, &read, timeout))
+	if (!ledger_read(device, &read, transport_packet, sizeof(transport_packet), timeout))
 		return false;
 
 	if (read != in.buffer.len) {
@@ -210,7 +210,7 @@ bool ledger_transport_ping(struct ledger_device *device)
 	return true;
 }
 
-bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t channel_id, const struct ledger_buffer *apdu)
+bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t channel_id, const uint8_t *buffer, size_t buffer_len)
 {
 	struct ledger_transport_command command = {
 		.header = {
@@ -220,30 +220,32 @@ bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t channel_
 	};
 
 	struct ledger_cursor out;
-	struct ledger_cursor in;
 
 	ledger_cursor_init(&out, command.payload.apdu.data, sizeof(command.payload.apdu.data));
-	ledger_cursor_init(&in, apdu->data, apdu->len);
 
+	uintptr_t written = 0;
 	uint16_t sequence_id = 0;
-	while (ledger_cursor_remaining(&in) > 0) {
+
+	while (written < buffer_len) {
 		ledger_cursor_wipe(&out);
 
 		if (sequence_id == 0) {
-			if (!ledger_cursor_write_u16(&out, apdu->len)) {
+			if (!ledger_cursor_write_u16(&out, buffer_len)) {
 				LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
 				return false;
 			}
 		}
 
-		size_t block_len = ledger_cursor_available(&out);
-		if (block_len > ledger_cursor_remaining(&in))
-			block_len = ledger_cursor_remaining(&in);
+		size_t block_len = ledger_cursor_remaining(&out);
+		if (block_len > (buffer_len - written))
+			block_len = buffer_len - written;
 
-		if (!ledger_cursor_copy(&out, &in, block_len)) {
+		if (!ledger_cursor_write_bytes(&out, buffer + written, block_len)) {
 			LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
 			return false;
 		}
+
+		written += block_len;
 
 		if (!ledger_transport_write(device, &command))
 			return false;
@@ -254,68 +256,65 @@ bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t channel_
 	return true;
 }
 
-bool ledger_transport_read_apdu(struct ledger_device *device, uint16_t channel_id, struct ledger_buffer **apdu)
+bool ledger_transport_read_apdu(struct ledger_device *device, uint16_t channel_id, size_t *len, uint8_t *buffer, size_t buffer_len)
 {
-	struct ledger_buffer *buffer = NULL;
-
 	struct ledger_cursor in;
-	struct ledger_cursor out;
 
+	uintptr_t read = 0;
 	uint16_t sequence_id = 0;
+	uint16_t total_len = 0;
+
+	memset(buffer, 0, buffer_len);
+
 	do {
 		struct ledger_transport_reply reply;
 		if (!ledger_transport_read(device, &reply, LEDGER_TRANSPORT_DEFAULT_TIMEOUT))
-			goto err_destroy_buffer;
+			return false;
 
 		if (reply.header.comm_channel_id != channel_id) {
 			LEDGER_SET_ERROR(device, LEDGER_ERROR_UNEXPECTED_REPLY);
-			goto err_destroy_buffer;
+			return false;
 		}
 
 		if (reply.header.command_tag != LEDGER_TRANSPORT_CMD_APDU) {
 			LEDGER_SET_ERROR(device, LEDGER_ERROR_UNEXPECTED_REPLY);
-			goto err_destroy_buffer;
+			return false;
 		}
 
 		if (reply.payload.apdu.sequence_id != sequence_id) {
 			LEDGER_SET_ERROR(device, LEDGER_ERROR_UNEXPECTED_REPLY);
-			goto err_destroy_buffer;
+			return false;
 		}
 
 		ledger_cursor_init(&in, reply.payload.apdu.data, sizeof(reply.payload.apdu.data));
+
 		if (reply.payload.apdu.sequence_id == 0) {
-			uint16_t total_len = 0;
 			if (!ledger_cursor_read_u16(&in, &total_len)) {
 				LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
 				return false;
 			}
 
-			buffer = ledger_buffer_create(total_len);
-			if (!buffer) {
-				LEDGER_SET_ERROR(device, LEDGER_ERROR_NOMEM);
+			*len = total_len;
+
+			if (buffer_len < total_len) {
+				LEDGER_SET_ERROR(device, LEDGER_ERROR_BUFFER_TOO_SMALL);
 				return false;
 			}
-
-			ledger_cursor_init(&out, buffer->data, buffer->len);
 		}
 
-		size_t remaining = ledger_cursor_remaining(&out);
-		if (remaining > ledger_cursor_available(&in))
-			remaining = ledger_cursor_available(&in);
+		size_t remaining = total_len - read;
+		if (remaining > ledger_cursor_remaining(&in))
+			remaining = ledger_cursor_remaining(&in);
 
-		if (!ledger_cursor_copy(&out, &in, remaining)) {
+		if (!ledger_cursor_read_bytes(&in, buffer + read, remaining)) {
 			LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
-			goto err_destroy_buffer;
+			return false;
 		}
+
+		read += remaining;
 
 		sequence_id++;
-	} while (ledger_cursor_available(&out) > 0);
-
-	*apdu = buffer;
+	} while (read < total_len);
 
 	return true;
-
-err_destroy_buffer:
-	ledger_buffer_destroy(buffer);
-	return false;
 }

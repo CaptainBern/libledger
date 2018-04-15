@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 
 	uint32_t target_id = 0x31100003;
 	if (!ledger_bolos_validate_target_id(device, LEDGER_TRANSPORT_DEFAULT_COMM_CHANNEL_ID, target_id)) {
-		printf("Failed to validate: %s\n", ledger_error_str(ledger_get_error(device)));
+		printf("Failed to validate: %s -> %s\n", ledger_error_str(ledger_get_error(device)), ledger_get_error_debug_str(device));
 		return EXIT_FAILURE;
 	}
 

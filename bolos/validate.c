@@ -12,21 +12,22 @@ bool ledger_bolos_validate_target_id(struct ledger_device *device, uint16_t chan
 	uint8_t data[sizeof(target_id)];
 
 	struct ledger_cursor cursor;
+
 	ledger_cursor_init(&cursor, data, sizeof(data));
 	ledger_cursor_write_u32(&cursor, target_id);
 
 	struct ledger_apdu_command command = LEDGER_APDU_COMMAND_INITIALIZER(
-			LEDGER_BOLOS_APDU_CLA, LEDGER_BOLOS_APDU_INS_VALIDATE, 0x0, 0x0, &cursor.buffer);
+			LEDGER_BOLOS_APDU_CLA, LEDGER_BOLOS_APDU_INS_VALIDATE, 0x0, 0x0, data, sizeof(data));
 
-	struct ledger_apdu_reply *reply = NULL;
-	if (!ledger_apdu_exchange(device, channel_id, &command, &reply))
+	size_t data_len = 0;
+	uint16_t status = 0;
+	if (!ledger_apdu_exchange(device, channel_id, &command, &data_len, NULL, 0, &status))
 		return false;
 
-	bool success = reply->status == 0x9000;
-	if (!success)
+	if (status != 0x9000) {
 		LEDGER_SET_ERROR(device, LEDGER_ERROR_OTHER);
+		return false;
+	}
 
-	ledger_apdu_reply_destroy(reply);
-
-	return success;
+	return true;
 }

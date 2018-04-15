@@ -9,6 +9,8 @@
 
 #include "libledger/bolos/version.h"
 
+#define LEDGER_BOLOS_VERSION_DATA_LENGTH 512
+
 void ledger_bolos_version_destroy(struct ledger_bolos_version *version)
 {
 	if (version) {
@@ -31,24 +33,27 @@ void ledger_bolos_version_destroy(struct ledger_bolos_version *version)
 bool ledger_bolos_get_version(struct ledger_device *device, uint16_t channel_id, struct ledger_bolos_version **version)
 {
 	struct ledger_apdu_command command = LEDGER_APDU_COMMAND_INITIALIZER(
-			LEDGER_BOLOS_APDU_CLA, LEDGER_BOLOS_APDU_INS_VERSION, 0x00, 0x00, NULL);
+			LEDGER_BOLOS_APDU_CLA, LEDGER_BOLOS_APDU_INS_VERSION, 0x00, 0x00, NULL, 0);
 
-	struct ledger_apdu_reply *reply = NULL;
-	if (!ledger_apdu_exchange(device, channel_id, &command, &reply))
+	size_t data_len = 0;
+	uint8_t data[LEDGER_BOLOS_VERSION_DATA_LENGTH];
+	uint16_t status = 0;
+
+	if (!ledger_apdu_exchange(device, channel_id, &command, &data_len, data, sizeof(data), &status))
 		return false;
 
-	if (reply->status != 0x9000) {
+	if (status != 0x9000) {
 		LEDGER_SET_ERROR(device, LEDGER_ERROR_OTHER);
-		goto err_destroy_apdu_reply;
+		return false;
 	}
 
 	struct ledger_cursor cursor;
-	ledger_cursor_init(&cursor, reply->data->data, reply->data->len);
+	ledger_cursor_init(&cursor, data, data_len);
 
 	struct ledger_bolos_version *_version = calloc(1, sizeof(struct ledger_bolos_version));
 	if (!_version) {
 		LEDGER_SET_ERROR(device, LEDGER_ERROR_NOMEM);
-		goto err_destroy_apdu_reply;
+		return false;
 	}
 
 	if (!ledger_cursor_read_u32(&cursor, &_version->target_id)) {
@@ -125,15 +130,11 @@ bool ledger_bolos_get_version(struct ledger_device *device, uint16_t channel_id,
 		}
 	}
 
-	ledger_apdu_reply_destroy(reply);
-
 	*version = _version;
 
 	return true;
 
 err_destroy_version:
 	ledger_bolos_version_destroy(_version);
-err_destroy_apdu_reply:
-	ledger_apdu_reply_destroy(reply);
 	return false;
 }

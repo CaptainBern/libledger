@@ -5,7 +5,6 @@
 #include "libledger/version.h"
 
 #include "libledger/apdu.h"
-#include "libledger/buffer.h"
 #include "libledger/device.h"
 #include "libledger/error.h"
 #include "libledger/transport.h"

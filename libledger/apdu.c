@@ -1,5 +1,3 @@
-#include <stdlib.h>
-
 #include "internal/macros.h"
 #include "internal/cursor.h"
 #include "libledger/error.h"
@@ -7,113 +5,91 @@
 
 #include "libledger/apdu.h"
 
-void ledger_apdu_reply_destroy(struct ledger_apdu_reply *reply)
+bool ledger_apdu_write(struct ledger_device *device, uint16_t channel_id, struct ledger_apdu_command *command)
 {
-	if (reply) {
-		if (reply->data)
-			ledger_buffer_destroy(reply->data);
+	uint8_t apdu[LEDGER_APDU_HEADER_LENGTH + command->data_len];
 
-		free(reply);
-	}
-}
-
-bool ledger_apdu_compose(struct ledger_apdu_command *command, struct ledger_buffer *buffer)
-{
 	struct ledger_cursor out;
 
-	ledger_cursor_init(&out, buffer->data, buffer->len);
+	ledger_cursor_init(&out, apdu, sizeof(apdu));
 	ledger_cursor_wipe(&out);
 
-	if (!ledger_cursor_write_u8(&out, command->cla))
+	if (!ledger_cursor_write_u8(&out, command->cla)) {
+		LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
 		return false;
+	}
 
-	if (!ledger_cursor_write_u8(&out, command->ins))
+	if (!ledger_cursor_write_u8(&out, command->ins)) {
+		LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
 		return false;
+	}
 
-	if (!ledger_cursor_write_u8(&out, command->p1))
+	if (!ledger_cursor_write_u8(&out, command->p1)) {
+		LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
 		return false;
+	}
 
-	if (!ledger_cursor_write_u8(&out, command->p2))
+	if (!ledger_cursor_write_u8(&out, command->p2)) {
+		LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
 		return false;
+	}
 
-	if (command->data) {
-		if (command->data->len > LEDGER_APDU_MAX_DATA_LENGTH)
+	if (command->data_len > 0) {
+		if (command->data_len > LEDGER_APDU_MAX_DATA_LENGTH) {
+			LEDGER_SET_ERROR(device, LEDGER_ERROR_INVALID_LENGTH);
 			return false;
+		}
 
-		if (!ledger_cursor_write_u8(&out, (command->data->len & 0xff)))
+		if (!ledger_cursor_write_u8(&out, command->data_len & 0xff)) {
+			LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
 			return false;
+		}
 
-		if (!ledger_cursor_write_bytes(&out, command->data->data, command->data->len))
+		if (!ledger_cursor_write_bytes(&out, command->data, command->data_len)) {
+			LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
 			return false;
+		}
 	} else {
-		if (!ledger_cursor_write_u8(&out, 0))
+		if (!ledger_cursor_write_u8(&out, 0)) {
+			LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
 			return false;
+		}
 	}
 
-	return true;
+	return ledger_transport_write_apdu(device, channel_id, apdu, sizeof(apdu));
 }
 
-bool ledger_apdu_parse(struct ledger_buffer *buffer, struct ledger_apdu_reply **reply)
+bool ledger_apdu_read(struct ledger_device *device, uint16_t channel_id, size_t *len, uint8_t *buffer, size_t buffer_len, uint16_t *status)
 {
+	uint8_t apdu[buffer_len + 2];
+	size_t apdu_len = 0;
+
 	struct ledger_cursor in;
-	ledger_cursor_init(&in, buffer->data, buffer->len);
 
-	struct ledger_apdu_reply *_reply = malloc(sizeof(struct ledger_apdu_reply));
-	if (!_reply)
+	if (!ledger_transport_read_apdu(device, channel_id, &apdu_len, apdu, sizeof(apdu)))
 		return false;
 
-	if (ledger_cursor_remaining(&in) < 2)
-		return false;
+	ledger_cursor_init(&in, apdu, apdu_len);
 
-	size_t apdu_data_len = ledger_cursor_remaining(&in) - 2;
-	if (apdu_data_len > 0) {
-		_reply->data = ledger_buffer_create(apdu_data_len);
-		if (!_reply->data)
+	size_t data_len = ledger_cursor_remaining(&in) - 2;
+	if (data_len > 0) {
+		if (!ledger_cursor_read_bytes(&in, buffer, data_len)) {
+			LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
 			return false;
-
-		if (!ledger_cursor_read_bytes(&in, _reply->data->data, _reply->data->len))
-			goto err_destroy_apdu_reply;
+		}
 	}
 
-	if (!ledger_cursor_read_u16(&in, &_reply->status))
-		goto err_destroy_apdu_reply;
+	*len = data_len;
 
-	*reply = _reply;
+	if (!ledger_cursor_read_u16(&in, status)) {
+		LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
+		return false;
+	}
 
 	return true;
-
-err_destroy_apdu_reply:
-	ledger_apdu_reply_destroy(_reply);
-	return false;
 }
 
-bool ledger_apdu_exchange(struct ledger_device *device, uint16_t channel_id, struct ledger_apdu_command *command, struct ledger_apdu_reply **reply)
+bool ledger_apdu_exchange(struct ledger_device *device, uint16_t channel_id, struct ledger_apdu_command *command, size_t *len, uint8_t *buffer, size_t buffer_len, uint16_t *status)
 {
-	uint8_t command_data[LEDGER_APDU_HEADER_LENGTH + (command->data ? command->data->len : 0)];
-	struct ledger_buffer command_buffer;
-
-	ledger_buffer_init(&command_buffer, command_data, sizeof(command_data));
-
-	if (!ledger_apdu_compose(command, &command_buffer)) {
-		LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
-		return false;
-	}
-
-	if (!ledger_transport_write_apdu(device, channel_id, &command_buffer))
-		return false;
-
-	struct ledger_buffer *reply_buffer;
-	if (!ledger_transport_read_apdu(device, channel_id, &reply_buffer))
-		return false;
-
-	if (!ledger_apdu_parse(reply_buffer, reply)) {
-		LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
-		goto err_destroy_reply_buffer;
-	}
-
-	return true;
-
-err_destroy_reply_buffer:
-	ledger_buffer_destroy(reply_buffer);
-	return false;
+	return ledger_apdu_write(device, channel_id, command) && ledger_apdu_read(device, channel_id, len, buffer, buffer_len, status);
 }

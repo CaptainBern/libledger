@@ -4,5 +4,5 @@ libledger_headers += files(
     'reset.h',
     'validate.h',
     'version.h',
-    'secret.h'
+    'secure.h'
 )

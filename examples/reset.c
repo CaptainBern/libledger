@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (!ledger_bolos_reset(device, LEDGER_TRANSPORT_DEFAULT_COMM_CHANNEL_ID)) {
-		printf("Reset failed: %s\n", ledger_error_str(ledger_get_error(device)));
+		printf("Reset failed: %s -> %s\n", ledger_error_str(ledger_get_error(device)), ledger_get_error_debug_str(device));
 		return EXIT_FAILURE;
 	}
 

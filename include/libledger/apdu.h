@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "libledger/buffer.h"
 #include "libledger/device.h"
 
 #ifdef __cplusplus
@@ -24,10 +23,11 @@ extern "C" {
  * @p1: First parameter byte.
  * @p2: Second parameter byte.
  * @data: APDU data.
+ * @data_len: APDU data length.
  *
  * A Simple utility macro to initialize APDU commands.
  */
-#define LEDGER_APDU_COMMAND_INITIALIZER(cla, ins, p1, p2, data) { (cla), (ins), (p1), (p2), (data) }
+#define LEDGER_APDU_COMMAND_INITIALIZER(cla, ins, p1, p2, data, data_len) { (cla), (ins), (p1), (p2), (data), (data_len) }
 
 /**
  * struct ledger_apdu_command - An APDU command packet.
@@ -35,7 +35,8 @@ extern "C" {
  * @ins: Instruction byte.
  * @p1: First parameter byte.
  * @p2: Second parameter byte.
- * @data: APDU data, may be set to NULL.
+ * @data: APDU data.
+ * @len: Length of the APDU data.
  *
  * A Ledger APDU command. Used to communicate
  * with Ledger devices.
@@ -45,43 +46,50 @@ struct ledger_apdu_command {
 	uint8_t ins;
 	uint8_t p1;
 	uint8_t p2;
-	struct ledger_buffer *data;
+	uint8_t *data;
+	size_t data_len;
 };
 
 /**
- * struct ledger_apdu_reply - An APDU reply packet.
- * @data: Reply data, may be set to NULL.
- * @status: APDU Status code.
+ * ledger_apdu_write() - Write an APDU command to the device.
+ * @device: A ledger_device pointer returned from ledger_open().
+ * @channel_id: The communication channel ID to use.
+ * @command: The command to send to the device.
  *
- * A Ledger APDU reply. The status field is always set.
+ * Return: True on success or false on failure.
  */
-struct ledger_apdu_reply {
-	struct ledger_buffer *data;
-	uint16_t status;
-};
+extern bool ledger_apdu_write(struct ledger_device *device, uint16_t channel_id, struct ledger_apdu_command *command);
 
 /**
- * ledger_apdu_reply_destroy() - Destroy an APDU reply.
- * @reply: A ledger_apdu_reply pointer set by the
- *         ledger_apdu_exchange funtion.
+ * ledger_apdu_read() - Read an APDU from the device.
+ * @device: A ledger_device pointer returned from ledger_open().
+ * @channel_id: The communication channel ID to use.
+ * @len: Length of the actual APDU reply data.
+ * @buffer: Buffer for the APDU reply data.
+ * @buffer_len: Length of the reply data buffer.
+ * @status: The status code from the APDU.
+ *
+ * Return: True on success or false on failure.
  */
-extern void ledger_apdu_reply_destroy(struct ledger_apdu_reply *reply);
+extern bool ledger_apdu_read(struct ledger_device *device, uint16_t channel_id, size_t *len, uint8_t *buffer, size_t buffer_len, uint16_t *status);
 
 /**
  * ledger_apdu_exchange() - Exchange an APDU with the device.
  * @device: A ledger_device pointer returned from ledger_open().
  * @channel_id: The communication channel ID to use.
  * @command: The command to send to the device.
- * @reply: Pointer location to the ledger_apdu_reply.
+  * @len: Length of the actual APDU reply data.
+ * @buffer: Buffer for the APDU reply data.
+ * @buffer_len: Length of the reply data buffer.
+ * @status: The status code from the APDU.
  *
- * This function will write the command to the device and then
- * try to read the reply. The reply will be allocated on the heap
- * and should be destroyed using ledger_apdu_reply_destroy after
- * you are done using it.
+ * This function first calls ledger_apdu_write() and
+ * then ledger_apdu_read(). Just to save you a few lines
+ * of code.
  *
  * Return: True on success or false on failure.
  */
-extern bool ledger_apdu_exchange(struct ledger_device *device, uint16_t channel_id, struct ledger_apdu_command *command, struct ledger_apdu_reply **reply);
+extern bool ledger_apdu_exchange(struct ledger_device *device, uint16_t channel_id, struct ledger_apdu_command *command, size_t *len, uint8_t *buffer, size_t buffer_len, uint16_t *status);
 
 #ifdef __cplusplus
 }
