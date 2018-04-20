@@ -4,6 +4,7 @@
 #include <hidapi/hidapi.h>
 
 #include "internal/macros.h"
+
 #include "libledger/error.h"
 
 #include "libledger/device.h"

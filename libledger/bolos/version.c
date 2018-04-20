@@ -9,7 +9,7 @@
 
 #include "libledger/bolos/version.h"
 
-#define LEDGER_BOLOS_VERSION_DATA_LENGTH 512
+#define LEDGER_BOLOS_VERSION_DATA_LENGTH 64
 
 void ledger_bolos_version_destroy(struct ledger_bolos_version *version)
 {
@@ -33,8 +33,9 @@ void ledger_bolos_version_destroy(struct ledger_bolos_version *version)
 bool ledger_bolos_get_version(struct ledger_device *device, uint16_t channel_id, struct ledger_bolos_version **version)
 {
 	struct ledger_apdu_command command = LEDGER_APDU_COMMAND_INITIALIZER(
-			LEDGER_BOLOS_APDU_CLA, LEDGER_BOLOS_APDU_INS_VERSION, 0x00, 0x00, NULL, 0);
+			LEDGER_BOLOS_APDU_CLA, LEDGER_BOLOS_APDU_INS_VERSION, 0x0, 0x0, NULL, 0);
 
+	struct ledger_cursor cursor;
 	size_t data_len = 0;
 	uint8_t data[LEDGER_BOLOS_VERSION_DATA_LENGTH];
 	uint16_t status = 0;
@@ -47,7 +48,6 @@ bool ledger_bolos_get_version(struct ledger_device *device, uint16_t channel_id,
 		return false;
 	}
 
-	struct ledger_cursor cursor;
 	ledger_cursor_init(&cursor, data, data_len);
 
 	struct ledger_bolos_version *_version = calloc(1, sizeof(struct ledger_bolos_version));

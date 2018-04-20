@@ -3,6 +3,7 @@
 
 #include "internal/macros.h"
 #include "internal/cursor.h"
+
 #include "libledger/error.h"
 #include "libledger/device.h"
 
@@ -10,8 +11,8 @@
 
 bool ledger_transport_write(struct ledger_device *device, struct ledger_transport_command *command)
 {
-	uint8_t transport_packet[LEDGER_TRANSPORT_MESSAGE_LENGTH];
 	struct ledger_cursor out;
+	uint8_t transport_packet[LEDGER_TRANSPORT_MESSAGE_LENGTH];
 
 	ledger_cursor_init(&out, transport_packet, sizeof(transport_packet));
 	ledger_cursor_wipe(&out);
@@ -63,8 +64,8 @@ bool ledger_transport_write(struct ledger_device *device, struct ledger_transpor
 
 bool ledger_transport_read(struct ledger_device *device, struct ledger_transport_reply *out, int timeout)
 {
-	uint8_t transport_packet[LEDGER_TRANSPORT_MESSAGE_LENGTH];
 	struct ledger_cursor in;
+	uint8_t transport_packet[LEDGER_TRANSPORT_MESSAGE_LENGTH];
 
 	ledger_cursor_init(&in, transport_packet, sizeof(transport_packet));
 	ledger_cursor_wipe(&in);
@@ -212,14 +213,13 @@ bool ledger_transport_ping(struct ledger_device *device)
 
 bool ledger_transport_write_apdu(struct ledger_device *device, uint16_t channel_id, const uint8_t *buffer, size_t buffer_len)
 {
+	struct ledger_cursor out;
 	struct ledger_transport_command command = {
 		.header = {
 			.comm_channel_id = channel_id,
 			.command_tag = LEDGER_TRANSPORT_CMD_APDU
 		}
 	};
-
-	struct ledger_cursor out;
 
 	ledger_cursor_init(&out, command.payload.apdu.data, sizeof(command.payload.apdu.data));
 

@@ -23,6 +23,7 @@ To build LibLedger you'll need the following dependencies:
 
 - LibUSB (used by HID API)
 - HID API (libhidapi-libusb)
+- mbedTLS (for BOLOS support)
 
 Then run the following commands:
 ```

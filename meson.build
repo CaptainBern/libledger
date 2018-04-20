@@ -26,25 +26,25 @@ libledger_deps    = []
 libledger_parts   = []
 
 if get_option('bolos_support')
-    subdir('bolos')
+    subdir('libledger/bolos')
     libledger_parts += libledger_bolos
     conf_data.set('LIBLEDGER_BOLOS_SUPPORT', true)
 endif
 
 if get_option('u2f_support')
-    subdir('u2f')
+    subdir('libledger/u2f')
     # TODO: libledger_parts += libledger_u2f
     conf_data.set('LIBLEDGER_U2F_SUPPORT', true)
 endif
 
 if get_option('ethereum_support')
-    subdir('ethereum')
+    subdir('libledger/ethereum')
     # TODO: libledger_parts += libledger_ethereum
     conf_data.set('LIBLEDGER_ETHEREUM_SUPPORT', true)
 endif
 
 if get_option('bitcoin_support')
-    subdir('bitcoin')
+    subdir('libledger/bitcoin')
     # TODO: libledger_parts += libledger_bitcoin
     conf_data.set('LIBLEDGER_BITCOIN_SUPPORT', true)
 endif

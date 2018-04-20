@@ -36,18 +36,18 @@ extern "C" {
  * @p1: First parameter byte.
  * @p2: Second parameter byte.
  * @data: APDU data.
- * @len: Length of the APDU data.
+ * @data_len: Length of the APDU data.
  *
  * A Ledger APDU command. Used to communicate
  * with Ledger devices.
  */
 struct ledger_apdu_command {
-	uint8_t cla;
-	uint8_t ins;
-	uint8_t p1;
-	uint8_t p2;
-	uint8_t *data;
-	size_t data_len;
+	const uint8_t cla;
+	const uint8_t ins;
+	const uint8_t p1;
+	const uint8_t p2;
+	const uint8_t *data;
+	const size_t data_len;
 };
 
 /**
@@ -64,7 +64,7 @@ extern bool ledger_apdu_write(struct ledger_device *device, uint16_t channel_id,
  * ledger_apdu_read() - Read an APDU from the device.
  * @device: A ledger_device pointer returned from ledger_open().
  * @channel_id: The communication channel ID to use.
- * @len: Length of the actual APDU reply data.
+ * @len: Length of the actual APDU reply data. May be NULL in case @buffer_len is 0.
  * @buffer: Buffer for the APDU reply data.
  * @buffer_len: Length of the reply data buffer.
  * @status: The status code from the APDU.
@@ -78,18 +78,17 @@ extern bool ledger_apdu_read(struct ledger_device *device, uint16_t channel_id, 
  * @device: A ledger_device pointer returned from ledger_open().
  * @channel_id: The communication channel ID to use.
  * @command: The command to send to the device.
-  * @len: Length of the actual APDU reply data.
+ * @len: Length of the actual APDU reply data.
  * @buffer: Buffer for the APDU reply data.
  * @buffer_len: Length of the reply data buffer.
  * @status: The status code from the APDU.
  *
- * This function first calls ledger_apdu_write() and
- * then ledger_apdu_read(). Just to save you a few lines
- * of code.
- *
  * Return: True on success or false on failure.
  */
-extern bool ledger_apdu_exchange(struct ledger_device *device, uint16_t channel_id, struct ledger_apdu_command *command, size_t *len, uint8_t *buffer, size_t buffer_len, uint16_t *status);
+static inline bool ledger_apdu_exchange(struct ledger_device *device, uint16_t channel_id, struct ledger_apdu_command *command, size_t *len, uint8_t *buffer, size_t buffer_len, uint16_t *status)
+{
+	return ledger_apdu_write(device, channel_id, command) && ledger_apdu_read(device, channel_id, len, buffer, buffer_len, status);
+}
 
 #ifdef __cplusplus
 }

@@ -5,7 +5,7 @@ libledger_bolos = static_library(
         'reset.c',
         'validate.c',
         'version.c',
-        'secure.c'
+        'secure_channel.c'
     ),
     include_directories: libledger_inc,
     dependencies: [

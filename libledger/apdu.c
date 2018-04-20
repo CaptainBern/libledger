@@ -1,5 +1,6 @@
 #include "internal/macros.h"
 #include "internal/cursor.h"
+
 #include "libledger/error.h"
 #include "libledger/transport.h"
 
@@ -7,9 +8,8 @@
 
 bool ledger_apdu_write(struct ledger_device *device, uint16_t channel_id, struct ledger_apdu_command *command)
 {
-	uint8_t apdu[LEDGER_APDU_HEADER_LENGTH + command->data_len];
-
 	struct ledger_cursor out;
+	uint8_t apdu[LEDGER_APDU_HEADER_LENGTH + command->data_len];
 
 	ledger_cursor_init(&out, apdu, sizeof(apdu));
 	ledger_cursor_wipe(&out);
@@ -61,10 +61,9 @@ bool ledger_apdu_write(struct ledger_device *device, uint16_t channel_id, struct
 
 bool ledger_apdu_read(struct ledger_device *device, uint16_t channel_id, size_t *len, uint8_t *buffer, size_t buffer_len, uint16_t *status)
 {
+	struct ledger_cursor in;
 	uint8_t apdu[buffer_len + 2];
 	size_t apdu_len = 0;
-
-	struct ledger_cursor in;
 
 	if (!ledger_transport_read_apdu(device, channel_id, &apdu_len, apdu, sizeof(apdu)))
 		return false;
@@ -77,9 +76,9 @@ bool ledger_apdu_read(struct ledger_device *device, uint16_t channel_id, size_t 
 			LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
 			return false;
 		}
-	}
 
-	*len = data_len;
+		*len = data_len;
+	}
 
 	if (!ledger_cursor_read_u16(&in, status)) {
 		LEDGER_SET_ERROR(device, LEDGER_ERROR_INTERNAL);
@@ -87,9 +86,4 @@ bool ledger_apdu_read(struct ledger_device *device, uint16_t channel_id, size_t 
 	}
 
 	return true;
-}
-
-bool ledger_apdu_exchange(struct ledger_device *device, uint16_t channel_id, struct ledger_apdu_command *command, size_t *len, uint8_t *buffer, size_t buffer_len, uint16_t *status)
-{
-	return ledger_apdu_write(device, channel_id, command) && ledger_apdu_read(device, channel_id, len, buffer, buffer_len, status);
 }
